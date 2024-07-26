@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch7</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>ِChapter7 Exam</h1>
+            <label class="slider-label">Select Language:</label>
+            <select id="languageSelect">
+                <option value="en">English</option>
+                <option value="ar">Arabic</option>
+            </select>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>
+           const questions = {
+        en:[
+  { type: 'mc', question: 'What is the present value of a future amount of $500,000 with an interest rate of 5% over 6 years?', options: ['A) $373,108', 'B) $400,000', 'C) $500,000', 'D) $550,000'], answer: 'A) $373,108' },
+  { type: 'mc', question: 'How do you calculate the future value of a single payment of $300,000 invested for 8 years at an interest rate of 6%?', options: ['A) $478,154', 'B) $500,000', 'C) $600,000', 'D) $450,000'], answer: 'A) $478,154' },
+  { type: 'mc', question: 'What is the formula for calculating the future value of a series of equal payments?', options: ['A) F = A(F/A, i, n)', 'B) P = F(P/F, i, n)', 'C) A = P(A/P, i, n)', 'D) F = P * (1+i)n'], answer: 'A) F = A(F/A, i, n)' },
+  { type: 'mc', question: 'What amount should be set aside each month to accumulate $50,000 in 10 years with an interest rate of 5% compounded monthly?', options: ['A) $321.99', 'B) $350.00', 'C) $300.00', 'D) $400.00'], answer: 'A) $321.99' },
+  { type: 'mc', question: 'If you need $500,000 in 6 years, how much should you invest today at an interest rate of 5%?', options: ['A) $373,108', 'B) $400,000', 'C) $450,000', 'D) $500,000'], answer: 'A) $373,108' },
+  { type: 'mc', question: 'What is the future value of a $230 monthly investment over 3 years at an annual interest rate of 4%?', options: ['A) $8,781.76', 'B) $8,000', 'C) $9,000', 'D) $7,500'], answer: 'A) $8,781.76' },
+  { type: 'mc', question: 'How much will you need to save each year to have $50,000 in 10 years with a 5% interest rate compounded monthly?', options: ['A) $321.99', 'B) $300.00', 'C) $350.00', 'D) $400.00'], answer: 'A) $321.99' },
+  { type: 'mc', question: 'What formula is used to determine the amount needed to set aside each year to achieve a future amount?', options: ['A) A = F(A/F, i, n)', 'B) P = F(P/F, i, n)', 'C) F = A(F/A, i, n)', 'D) A = P(A/P, i, n)'], answer: 'A) A = F(A/F, i, n)' },
+  { type: 'mc', question: 'How do you find the present worth of a future amount with a given interest rate and number of periods?', options: ['A) P = F(P/F, i, n)', 'B) F = P(F/P, i, n)', 'C) A = P(A/P, i, n)', 'D) P = F * (1+i)-n'], answer: 'A) P = F(P/F, i, n)' },
+  { type: 'mc', question: 'What is the capital recovery amount needed to repay a loan of $50,000 over 7 years with an 8% interest rate?', options: ['A) $9,604', 'B) $10,000', 'C) $8,000', 'D) $12,000'], answer: 'A) $9,604' },
+  { type: 'mc', question: 'How much will you have after investing $1,000 monthly for 5 years with an annual interest rate of 6% compounded monthly?', options: ['A) $67,439', 'B) $62,000', 'C) $70,000', 'D) $60,000'], answer: 'A) $67,439' },
+  { type: 'mc', question: 'What is the future value of an investment of $2,500 made today for 4 years at an annual interest rate of 7% compounded annually?', options: ['A) $3,352', 'B) $3,000', 'C) $3,500', 'D) $3,200'], answer: 'A) $3,352' },
+  { type: 'mc', question: 'How much should be deposited today to accumulate $10,000 in 15 years with an interest rate of 8% compounded annually?', options: ['A) $3,172', 'B) $2,500', 'C) $4,000', 'D) $5,000'], answer: 'A) $3,172' },
+  { type: 'mc', question: 'What is the monthly payment on a loan of $50,000 at an annual interest rate of 6% over 10 years?', options: ['A) $555.65', 'B) $600.00', 'C) $525.00', 'D) $580.00'], answer: 'A) $555.65' },
+  { type: 'mc', question: 'What is the amount of equal payments required to repay a loan of $100,000 over 20 years with an annual interest rate of 5%?', options: ['A) $8,042.93', 'B) $7,500.00', 'C) $8,500.00', 'D) $7,800.00'], answer: 'A) $8,042.93' },
+  { type: 'mc', question: 'If you need $20,000 in 10 years, how much should you invest today at an interest rate of 4% compounded quarterly?', options: ['A) $13,690', 'B) $14,000', 'C) $12,500', 'D) $15,000'], answer: 'A) $13,690' },
+  { type: 'mc', question: 'How much will you have after investing $500 monthly for 2 years with an annual interest rate of 3% compounded monthly?', options: ['A) $12,309', 'B) $12,000', 'C) $11,500', 'D) $13,000'], answer: 'A) $12,309' },
+  { type: 'mc', question: 'What is the present worth of a series of 5 annual payments of $1,000 each with an interest rate of 9%?', options: ['A) $3,889', 'B) $4,000', 'C) $3,500', 'D) $3,200'], answer: 'A) $3,889' },
+  { type: 'mc', question: 'What is the future value of an investment of $800 made today for 7 years at an annual interest rate of 5% compounded semi-annually?', options: ['A) $1,120', 'B) $1,100', 'C) $1,150', 'D) $1,200'], answer: 'A) $1,120' },
+  { type: 'mc', question: 'How much should be saved monthly to accumulate $30,000 in 8 years with an annual interest rate of 6% compounded monthly?', options: ['A) $288.39', 'B) $300.00', 'C) $275.00', 'D) $250.00'], answer: 'A) $288.39' },
+  { type: 'mc', question: 'What is the amount of equal payments required to accumulate $25,000 in 10 years with an interest rate of 5% compounded quarterly?', options: ['A) $170.09', 'B) $175.00', 'C) $180.00', 'D) $160.00'], answer: 'A) $170.09' },
+  { type: 'mc', question: 'How much will you receive after investing $5,000 for 3 years with an annual interest rate of 4% compounded annually?', options: ['A) $5,624', 'B) $5,500', 'C) $5,800', 'D) $5,700'], answer: 'A) $5,624' },
+  { type: 'mc', question: 'What is the present value of $8,000 received in 4 years with an interest rate of 7% compounded annually?', options: ['A) $5,262', 'B) $5,500', 'C) $5,000', 'D) $5,800'], answer: 'A) $5,262' },
+  { type: 'mc', question: 'How much will you need to invest today to have $15,000 in 5 years with an interest rate of 6% compounded quarterly?', options: ['A) $11,205', 'B) $11,500', 'C) $12,000', 'D) $10,800'], answer: 'A) $11,205' },
+  { type: 'mc', question: 'What is the future value of an equal payment of $300 made monthly for 6 years with an annual interest rate of 5% compounded monthly?', options: ['A) $23,398', 'B) $24,000', 'C) $22,000', 'D) $25,000'], answer: 'A) $23,398' },
+  { type: 'mc', question: 'How much should be invested monthly to have $50,000 in 12 years with an annual interest rate of 7% compounded monthly?', options: ['A) $236.73', 'B) $250.00', 'C) $220.00', 'D) $260.00'], answer: 'A) $236.73' },
+  { type: 'mc', question: 'What is the present value of $2,000 received in 3 years with an annual interest rate of 8% compounded quarterly?', options: ['A) $1,587', 'B) $1,600', 'C) $1,500', 'D) $1,700'], answer: 'A) $1,587' },
+  { type: 'mc', question: 'How much will you need to save annually to accumulate $100,000 in 20 years with an interest rate of 6% compounded annually?', options: ['A) $2,293', 'B) $2,500', 'C) $2,000', 'D) $2,700'], answer: 'A) $2,293' },
+  { type: 'mc', question: 'What is the future value of a $1,500 investment made today for 10 years at an annual interest rate of 5% compounded annually?', options: ['A) $2,448', 'B) $2,500', 'C) $2,600', 'D) $2,700'], answer: 'A) $2,448' },
+  { type: 'mc', question: 'How much should be invested today to accumulate $8,000 in 2 years with an interest rate of 7% compounded semi-annually?', options: ['A) $7,000', 'B) $6,900', 'C) $6,800', 'D) $7,500'], answer: 'A) $7,000' },
+  { type: 'mc', question: 'What is the monthly payment on a loan of $15,000 at an annual interest rate of 4% over 5 years?', options: ['A) $2,775', 'B) $2,800', 'C) $2,500', 'D) $2,600'], answer: 'A) $2,775' },
+  { type: 'mc', question: 'What is the present value of an investment of $10,000 received in 6 years with an interest rate of 5% compounded annually?', options: ['A) $7,470', 'B) $7,500', 'C) $8,000', 'D) $7,200'], answer: 'A) $7,470' },
+  { type: 'mc', question: 'How much should you invest monthly to accumulate $20,000 in 5 years with an annual interest rate of 6% compounded monthly?', options: ['A) $295.53', 'B) $300.00', 'C) $280.00', 'D) $310.00'], answer: 'A) $295.53' },
+  { type: 'mc', question: 'What is the future value of an investment of $4,000 made today for 12 years at an annual interest rate of 6% compounded quarterly?', options: ['A) $8,045', 'B) $8,000', 'C) $8,500', 'D) $7,800'], answer: 'A) $8,045' },
+  { type: 'mc', question: 'How much will you need to invest annually to accumulate $60,000 in 15 years with an interest rate of 5% compounded annually?', options: ['A) $2,542', 'B) $2,600', 'C) $2,400', 'D) $2,700'], answer: 'A) $2,542' },
+  { type: 'mc', question: 'What is the present value of a future amount of $30,000 with an interest rate of 7% over 10 years?', options: ['A) $15,284', 'B) $15,000', 'C) $16,000', 'D) $14,000'], answer: 'A) $15,284' },
+  { type: 'mc', question: 'How much will you have after investing $1,200 monthly for 8 years with an annual interest rate of 4% compounded monthly?', options: ['A) $132,664', 'B) $130,000', 'C) $140,000', 'D) $125,000'], answer: 'A) $132,664' },
+  { type: 'mc', question: 'What is the future value of an investment of $3,000 made today for 5 years at an annual interest rate of 8% compounded annually?', options: ['A) $4,440', 'B) $4,500', 'C) $4,600', 'D) $4,200'], answer: 'A) $4,440' },
+  { type: 'mc', question: 'How much should be saved monthly to accumulate $45,000 in 7 years with an annual interest rate of 5% compounded monthly?', options: ['A) $415.48', 'B) $400.00', 'C) $430.00', 'D) $420.00'], answer: 'A) $415.48' },
+  { type: 'mc', question: 'What is the amount of equal payments required to repay a loan of $80,000 over 15 years with an annual interest rate of 6%?', options: ['A) $6,875.00', 'B) $7,000.00', 'C) $6,500.00', 'D) $7,200.00'], answer: 'A) $6,875.00' },
+  { type: 'mc', question: 'What is the present value of $25,000 received in 10 years with an annual interest rate of 4% compounded annually?', options: ['A) $17,074', 'B) $17,500', 'C) $18,000', 'D) $16,500'], answer: 'A) $17,074' },
+  { type: 'mc', question: 'How much will you receive after investing $2,000 monthly for 5 years with an annual interest rate of 6% compounded monthly?', options: ['A) $14,858', 'B) $15,000', 'C) $13,500', 'D) $14,500'], answer: 'A) $14,858' },
+  { type: 'mc', question: 'What is the future value of a single payment of $1,000 invested for 7 years at an annual interest rate of 5% compounded annually?', options: ['A) $1,407', 'B) $1,400', 'C) $1,450', 'D) $1,350'], answer: 'A) $1,407' },
+  { type: 'mc', question: 'How much should be invested today to accumulate $25,000 in 8 years with an interest rate of 5% compounded annually?', options: ['A) $16,648', 'B) $17,000', 'C) $16,000', 'D) $15,500'], answer: 'A) $16,648' },
+  { type: 'mc', question: 'What is the amount of equal payments required to accumulate $35,000 in 12 years with an annual interest rate of 7% compounded monthly?', options: ['A) $148.53', 'B) $150.00', 'C) $140.00', 'D) $160.00'], answer: 'A) $148.53' },
+  { type: 'mc', question: 'How much will you have after investing $750 monthly for 6 years with an annual interest rate of 4% compounded monthly?', options: ['A) $57,890', 'B) $58,000', 'C) $56,000', 'D) $60,000'], answer: 'A) $57,890' },
+  { type: 'mc', question: 'What is the future value of an investment of $1,200 made today for 10 years at an annual interest rate of 6% compounded quarterly?', options: ['A) $2,147', 'B) $2,200', 'C) $2,300', 'D) $2,100'], answer: 'A) $2,147' },
+  { type: 'mc', question: 'How much should be saved annually to accumulate $40,000 in 15 years with an interest rate of 5% compounded annually?', options: ['A) $1,525', 'B) $1,600', 'C) $1,400', 'D) $1,700'], answer: 'A) $1,525' },
+  { type: 'mc', question: 'What is the present value of a future amount of $50,000 with an annual interest rate of 5% over 12 years?', options: ['A) $28,206', 'B) $30,000', 'C) $29,000', 'D) $27,000'], answer: 'A) $28,206' },
+  { type: 'mc', question: 'How much will you receive after investing $1,000 monthly for 4 years with an annual interest rate of 5% compounded monthly?', options: ['A) $50,682', 'B) $52,000', 'C) $49,000', 'D) $51,000'], answer: 'A) $50,682' },
+  { type: 'mc', question: 'What is the future value of a single payment of $2,500 invested for 6 years at an annual interest rate of 4% compounded annually?', options: ['A) $3,177', 'B) $3,200', 'C) $3,300', 'D) $3,100'], answer: 'A) $3,177' },
+  { type: 'mc', question: 'How much should be invested today to accumulate $35,000 in 5 years with an interest rate of 6% compounded annually?', options: ['A) $26,151', 'B) $27,000', 'C) $25,000', 'D) $28,000'], answer: 'A) $26,151' },
+  { type: 'mc', question: 'What is the present value of a future amount of $60,000 with an interest rate of 7% over 15 years?', options: ['A) $22,800', 'B) $23,000', 'C) $24,000', 'D) $21,500'], answer: 'A) $22,800' }
+] 
+        ,
+        ar: [
+  { type: 'mc', question: 'ما هو القيمة الحالية لمبلغ مستقبلي قدره 500,000 دولار بمعدل فائدة 5% على مدى 6 سنوات؟', options: ['A) 373,108 دولار', 'B) 400,000 دولار', 'C) 500,000 دولار', 'D) 550,000 دولار'], answer: 'A) 373,108 دولار' },
+  { type: 'mc', question: 'كيف يتم حساب القيمة المستقبلية لدفعة واحدة قدرها 300,000 دولار مستثمرة لمدة 8 سنوات بمعدل فائدة 6%؟', options: ['A) 478,154 دولار', 'B) 500,000 دولار', 'C) 600,000 دولار', 'D) 450,000 دولار'], answer: 'A) 478,154 دولار' },
+  { type: 'mc', question: 'ما هي الصيغة المستخدمة لحساب القيمة المستقبلية لسلسلة من المدفوعات المتساوية؟', options: ['A) F = A(F/A, i, n)', 'B) P = F(P/F, i, n)', 'C) A = P(A/P, i, n)', 'D) F = P * (1+i)n'], answer: 'A) F = A(F/A, i, n)' },
+  { type: 'mc', question: 'كم يجب ادخاره شهريًا لتجميع 50,000 دولار خلال 10 سنوات بمعدل فائدة 5% مركبة شهريًا؟', options: ['A) 321.99 دولار', 'B) 350.00 دولار', 'C) 300.00 دولار', 'D) 400.00 دولار'], answer: 'A) 321.99 دولار' },
+  { type: 'mc', question: 'إذا كنت بحاجة إلى 500,000 دولار في 6 سنوات، كم يجب عليك استثماره اليوم بمعدل فائدة 5%؟', options: ['A) 373,108 دولار', 'B) 400,000 دولار', 'C) 450,000 دولار', 'D) 500,000 دولار'], answer: 'A) 373,108 دولار' },
+  { type: 'mc', question: 'ما هي القيمة المستقبلية لاستثمار شهري قدره 230 دولار على مدى 3 سنوات بمعدل فائدة سنوي قدره 4%؟', options: ['A) 8,781.76 دولار', 'B) 8,000 دولار', 'C) 9,000 دولار', 'D) 7,500 دولار'], answer: 'A) 8,781.76 دولار' },
+  { type: 'mc', question: 'كم يجب ادخاره سنويًا للحصول على 50,000 دولار خلال 10 سنوات بمعدل فائدة 5% مركبة شهريًا؟', options: ['A) 321.99 دولار', 'B) 300.00 دولار', 'C) 350.00 دولار', 'D) 400.00 دولار'], answer: 'A) 321.99 دولار' },
+  { type: 'mc', question: 'ما هي الصيغة المستخدمة لتحديد المبلغ اللازم ادخاره سنويًا لتحقيق مبلغ مستقبلي؟', options: ['A) A = F(A/F, i, n)', 'B) P = F(P/F, i, n)', 'C) F = A(F/A, i, n)', 'D) A = P(A/P, i, n)'], answer: 'A) A = F(A/F, i, n)' },
+  { type: 'mc', question: 'كيف تجد القيمة الحالية لمبلغ مستقبلي بمعدل فائدة وعدد فترات معين؟', options: ['A) P = F(P/F, i, n)', 'B) F = P(F/P, i, n)', 'C) A = P(A/P, i, n)', 'D) P = F * (1+i)-n'], answer: 'A) P = F(P/F, i, n)' },
+  { type: 'mc', question: 'ما هو مبلغ الاسترداد الرأسمالي اللازم لسداد قرض قدره 50,000 دولار على مدى 7 سنوات بمعدل فائدة 8%؟', options: ['A) 9,604 دولار', 'B) 10,000 دولار', 'C) 8,000 دولار', 'D) 12,000 دولار'], answer: 'A) 9,604 دولار' },
+  { type: 'mc', question: 'كم ستملك بعد استثمار 1,000 دولار شهريًا لمدة 5 سنوات بمعدل فائدة سنوي قدره 6% مركب شهريًا؟', options: ['A) 67,439 دولار', 'B) 62,000 دولار', 'C) 70,000 دولار', 'D) 60,000 دولار'], answer: 'A) 67,439 دولار' },
+  { type: 'mc', question: 'ما هي القيمة المستقبلية لاستثمار قدره 2,500 دولار اليوم لمدة 4 سنوات بمعدل فائدة سنوي قدره 7% مركب سنويًا؟', options: ['A) 3,352 دولار', 'B) 3,000 دولار', 'C) 3,500 دولار', 'D) 3,200 دولار'], answer: 'A) 3,352 دولار' },
+  { type: 'mc', question: 'كم يجب استثماره اليوم لتجميع 10,000 دولار في 15 سنة بمعدل فائدة قدره 8% مركب سنويًا؟', options: ['A) 3,172 دولار', 'B) 2,500 دولار', 'C) 4,000 دولار', 'D) 5,000 دولار'], answer: 'A) 3,172 دولار' },
+  { type: 'mc', question: 'ما هو القسط الشهري لقرض قدره 50,000 دولار بمعدل فائدة سنوي قدره 6% على مدى 10 سنوات؟', options: ['A) 555.65 دولار', 'B) 600.00 دولار', 'C) 525.00 دولار', 'D) 580.00 دولار'], answer: 'A) 555.65 دولار' },
+  { type: 'mc', question: 'ما هو مبلغ الأقساط المتساوية المطلوب لسداد قرض قدره 100,000 دولار على مدى 20 سنة بمعدل فائدة سنوي قدره 5%؟', options: ['A) 8,042.93 دولار', 'B) 7,500.00 دولار', 'C) 8,500.00 دولار', 'D) 7,800.00 دولار'], answer: 'A) 8,042.93 دولار' },
+  { type: 'mc', question: 'إذا كنت بحاجة إلى 20,000 دولار في 10 سنوات، كم يجب أن تستثمر اليوم بمعدل فائدة قدره 4% مركب ربع سنويًا؟', options: ['A) 13,690 دولار', 'B) 14,000 دولار', 'C) 12,500 دولار', 'D) 15,000 دولار'], answer: 'A) 13,690 دولار' },
+  { type: 'mc', question: 'كم ستملك بعد استثمار 500 دولار شهريًا لمدة سنتين بمعدل فائدة سنوي قدره 3% مركب شهريًا؟', options: ['A) 12,309 دولار', 'B) 12,000 دولار', 'C) 11,500 دولار', 'D) 13,000 دولار'], answer: 'A) 12,309 دولار' },
+  { type: 'mc', question: 'ما هي القيمة الحالية لسلسلة من 5 دفعات سنوية قدرها 1,000 دولار كل منها بمعدل فائدة قدره 9%؟', options: ['A) 3,889 دولار', 'B) 4,000 دولار', 'C) 3,500 دولار', 'D) 3,200 دولار'], answer: 'A) 3,889 دولار' },
+  { type: 'mc', question: 'ما هي القيمة المستقبلية لاستثمار قدره 800 دولار اليوم لمدة 7 سنوات بمعدل فائدة سنوي قدره 5% مركب نصف سنويًا؟', options: ['A) 1,120 دولار', 'B) 1,100 دولار', 'C) 1,150 دولار', 'D) 1,200 دولار'], answer: 'A) 1,120 دولار' },
+  { type: 'mc', question: 'كم يجب توفيره شهريًا لتجميع 30,000 دولار في 8 سنوات بمعدل فائدة سنوي قدره 6% مركب شهريًا؟', options: ['A) 288.39 دولار', 'B) 300.00 دولار', 'C) 275.00 دولار', 'D) 250.00 دولار'], answer: 'A) 288.39 دولار' },
+  { type: 'mc', question: 'ما هو مبلغ الأقساط المتساوية المطلوب لتجميع 25,000 دولار في 10 سنوات بمعدل فائدة قدره 5% مركب ربع سنويًا؟', options: ['A) 170.09 دولار', 'B) 175.00 دولار', 'C) 180.00 دولار', 'D) 160.00 دولار'], answer: 'A) 170.09 دولار' },
+  { type: 'mc', question: 'كم ستتلقى بعد استثمار 5,000 دولار لمدة 3 سنوات بمعدل فائدة سنوي قدره 4% مركب سنويًا؟', options: ['A) 5,624 دولار', 'B) 5,500 دولار', 'C) 5,800 دولار', 'D) 5,700 دولار'], answer: 'A) 5,624 دولار' },
+  { type: 'mc', question: 'ما هي القيمة الحالية لمبلغ 8,000 دولار يتلقى في 4 سنوات بمعدل فائدة قدره 7% مركب سنويًا؟', options: ['A) 5,262 دولار', 'B) 5,500 دولار', 'C) 5,000 دولار', 'D) 5,800 دولار'], answer: 'A) 5,262 دولار' },
+  { type: 'mc', question: 'كم يجب استثماره اليوم لتجميع 15,000 دولار في 5 سنوات بمعدل فائدة قدره 6% مركب ربع سنويًا؟', options: ['A) 11,205 دولار', 'B) 11,500 دولار', 'C) 12,000 دولار', 'D) 10,800 دولار'], answer: 'A) 11,205 دولار' },
+  { type: 'mc', question: 'ما هي القيمة المستقبلية لقسط قدره 300 دولار شهريًا لمدة 6 سنوات بمعدل فائدة سنوي قدره 5% مركب شهريًا؟', options: ['A) 23,398 دولار', 'B) 24,000 دولار', 'C) 22,000 دولار', 'D) 25,000 دولار'], answer: 'A) 23,398 دولار' },
+  { type: 'mc', question: 'كم يجب توفيره شهريًا لتجميع 50,000 دولار في 12 سنة بمعدل فائدة سنوي قدره 7% مركب شهريًا؟', options: ['A) 236.73 دولار', 'B) 250.00 دولار', 'C) 220.00 دولار', 'D) 260.00 دولار'], answer: 'A) 236.73 دولار' },
+  { type: 'mc', question: 'ما هي القيمة الحالية لمبلغ 2,000 دولار يتلقى في 3 سنوات بمعدل فائدة قدره 8% مركب ربع سنويًا؟', options: ['A) 1,587 دولار', 'B) 1,600 دولار', 'C) 1,500 دولار', 'D) 1,700 دولار'], answer: 'A) 1,587 دولار' },
+  { type: 'mc', question: 'كم يجب توفيره سنويًا لتجميع 60,000 دولار في 15 سنة بمعدل فائدة قدره 5% مركب سنويًا؟', options: ['A) 2,542 دولار', 'B) 2,600 دولار', 'C) 2,400 دولار', 'D) 2,700 دولار'], answer: 'A) 2,542 دولار' },
+  { type: 'mc', question: 'ما هي القيمة الحالية لمبلغ 50,000 دولار بمعدل فائدة قدره 5% على مدى 12 سنة؟', options: ['A) 28,206 دولار', 'B) 30,000 دولار', 'C) 29,000 دولار', 'D) 27,000 دولار'], answer: 'A) 28,206 دولار' },
+  { type: 'mc', question: 'كم ستتلقى بعد استثمار 1,000 دولار شهريًا لمدة 4 سنوات بمعدل فائدة سنوي قدره 5% مركب شهريًا؟', options: ['A) 50,682 دولار', 'B) 52,000 دولار', 'C) 49,000 دولار', 'D) 51,000 دولار'], answer: 'A) 50,682 دولار' },
+  { type: 'mc', question: 'ما هي القيمة المستقبلية لقسط قدره 2,500 دولار مستثمرة لمدة 6 سنوات بمعدل فائدة سنوي قدره 4% مركب سنويًا؟', options: ['A) 3,177 دولار', 'B) 3,200 دولار', 'C) 3,300 دولار', 'D) 3,100 دولار'], answer: 'A) 3,177 دولار' },
+  { type: 'mc', question: 'كم يجب استثماره اليوم لتجميع 35,000 دولار في 5 سنوات بمعدل فائدة قدره 6% مركب سنويًا؟', options: ['A) 26,151 دولار', 'B) 27,000 دولار', 'C) 25,000 دولار', 'D) 28,000 دولار'], answer: 'A) 26,151 دولار' },
+  { type: 'mc', question: 'ما هي القيمة الحالية لمبلغ 60,000 دولار بمعدل فائدة قدره 7% على مدى 15 سنة؟', options: ['A) 22,800 دولار', 'B) 23,000 دولار', 'C) 24,000 دولار', 'D) 21,500 دولار'], answer: 'A) 22,800 دولار' },
+]   
+      };
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+        let selectedLanguage = 'en';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+        });
+
+        function updateRangeValues() {
+            const mcRange = document.getElementById('mcCount');
+            mcRange.max = questions[selectedLanguage].filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function startExam() {
+            selectedLanguage = document.getElementById('languageSelect').value;
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const mcQuestions = questions[selectedLanguage].filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return mcQuestions;
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = true;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((q, index) => {
+                if (userAnswers[index] === q.answer) {
+                    score++;
+                    correctAnswers.push(index + 1);
+                }
+            });
+            document.getElementById('resultContainer').innerHTML = `
+                <div class="result">
+                    <h2>Results</h2>
+                    <p>You scored ${score} out of ${selectedQuestions.length}.</p>
+                    <p>Correct answers: ${correctAnswers.join(', ')}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch5</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>ِChapter5 Exam</h1>
+            <label class="slider-label">Select Language:</label>
+            <select id="languageSelect">
+                <option value="en">English</option>
+                <option value="ar">Arabic</option>
+            </select>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>
+      const questions = {
+"en": [
+        { "type": "mc", "question": "What is the formula for calculating the present value of a future sum?", "options": ["A) PV = FV / (1 + i)n", "B) PV = FV × (1 + i)n", "C) PV = FV × (1 - i)n", "D) PV = FV × i / (1 + i)n"], "answer": "A) PV = FV / (1 + i)n" },
+        { "type": "mc", "question": "If you deposit $1,000 in a savings account with an annual interest rate of 5%, what will the amount be after 3 years if compounded annually?", "options": ["A) $1,157.63", "B) $1,150.00", "C) $1,160.00", "D) $1,200.00"], "answer": "A) $1,157.63" },
+        { "type": "mc", "question": "How do you calculate the annual percentage rate (APR)?", "options": ["A) APR = (Total Interest / Loan Amount) × 100", "B) APR = (Total Interest / Principal) × 100", "C) APR = (Interest Rate / Number of Periods) × 100", "D) APR = (Monthly Payment / Loan Amount) × 100"], "answer": "B) APR = (Total Interest / Principal) × 100" },
+        { "type": "mc", "question": "What does the term 'net present value' (NPV) measure?", "options": ["A) The total cost of an investment", "B) The difference between the present value of cash inflows and outflows", "C) The future value of an investment", "D) The annual cash flow of an investment"], "answer": "B) The difference between the present value of cash inflows and outflows" },
+        { "type": "mc", "question": "In capital budgeting, what is the purpose of a payback period analysis?", "options": ["A) To determine the profitability of an investment", "B) To calculate the return on investment", "C) To measure how long it will take to recoup the initial investment", "D) To evaluate the risk of an investment"], "answer": "C) To measure how long it will take to recoup the initial investment" },
+        { "type": "mc", "question": "What is an annuity?", "options": ["A) A series of equal payments made at regular intervals", "B) A one-time payment made at the end of the period", "C) A loan with variable interest rates", "D) A type of investment with high risk"], "answer": "A) A series of equal payments made at regular intervals" },
+        { "type": "mc", "question": "What does 'internal rate of return' (IRR) represent?", "options": ["A) The rate at which net present value equals zero", "B) The annual percentage rate of return on investment", "C) The interest rate on a loan", "D) The total return on investment over its lifetime"], "answer": "A) The rate at which net present value equals zero" },
+        { "type": "mc", "question": "How is the future value of an annuity calculated?", "options": ["A) FV = P × ((1 + i)n - 1) / i", "B) FV = P × (1 + i)n", "C) FV = P × (1 - i)n", "D) FV = P × i / (1 + i)n"], "answer": "A) FV = P × ((1 + i)n - 1) / i" },
+        { "type": "mc", "question": "What is the primary purpose of conducting a break-even analysis?", "options": ["A) To determine the sales volume needed to cover fixed and variable costs", "B) To calculate the profitability of a new project", "C) To estimate the market demand for a product", "D) To evaluate the return on investment"], "answer": "A) To determine the sales volume needed to cover fixed and variable costs" },
+        { "type": "mc", "question": "How do you calculate the present value of a perpetuity?", "options": ["A) PV = C / i", "B) PV = C × (1 + i)n", "C) PV = C / (1 + i)n", "D) PV = C × i / (1 + i)n"], "answer": "A) PV = C / i" },
+        { "type": "mc", "question": "What is the formula for calculating the present value of a single future payment?", "options": ["A) PV = FV / (1 + i)n", "B) PV = FV × (1 + i)n", "C) PV = FV × (1 - i)n", "D) PV = FV × i / (1 + i)n"], "answer": "A) PV = FV / (1 + i)n" },
+        { "type": "mc", "question": "What is the purpose of a sensitivity analysis in financial modeling?", "options": ["A) To assess how changes in assumptions affect the outcome", "B) To determine the best investment strategy", "C) To forecast future cash flows", "D) To calculate the internal rate of return"], "answer": "A) To assess how changes in assumptions affect the outcome" },
+        { "type": "mc", "question": "In project evaluation, what is the significance of a positive net present value (NPV)?", "options": ["A) The project is expected to generate more value than its cost", "B) The project will have no return on investment", "C) The project is expected to lose value", "D) The project has no financial implications"], "answer": "A) The project is expected to generate more value than its cost" },
+        { "type": "mc", "question": "How is the annual equivalent cost (AEC) used in project evaluation?", "options": ["A) To convert all costs into a single annual amount", "B) To calculate the future value of a project", "C) To determine the project's internal rate of return", "D) To estimate the break-even point"], "answer": "A) To convert all costs into a single annual amount" },
+        { "type": "mc", "question": "What does a high payback period indicate about an investment?", "options": ["A) It takes longer to recover the initial investment", "B) It will generate quick returns", "C) It is a low-risk investment", "D) It has a high internal rate of return"], "answer": "A) It takes longer to recover the initial investment" },
+        { "type": "mc", "question": "What is the difference between a simple and a compound interest rate?", "options": ["A) Simple interest is calculated only on the principal, while compound interest is calculated on both principal and accumulated interest", "B) Compound interest is calculated on the principal only", "C) Simple interest earns interest on interest", "D) Simple interest is always higher than compound interest"], "answer": "A) Simple interest is calculated only on the principal, while compound interest is calculated on both principal and accumulated interest" },
+        { "type": "mc", "question": "How is the future value of a lump sum calculated with annual compounding?", "options": ["A) FV = PV × (1 + i)n", "B) FV = PV × (1 - i)n", "C) FV = PV × (1 + i / n)n", "D) FV = PV × i / (1 + i)n"], "answer": "A) FV = PV × (1 + i)n" },
+        { "type": "mc", "question": "What is the purpose of using a discount rate in present value calculations?", "options": ["A) To account for the time value of money", "B) To determine the future value", "C) To calculate the interest rate", "D) To estimate project costs"], "answer": "A) To account for the time value of money" },
+        { "type": "mc", "question": "What does the term 'effective annual rate' (EAR) represent?", "options": ["A) The annual rate of interest that accounts for compounding", "B) The rate of interest before compounding", "C) The nominal rate of interest", "D) The rate of return on an investment"], "answer": "A) The annual rate of interest that accounts for compounding" },
+        { "type": "mc", "question": "In financial modeling, what does 'scenario analysis' involve?", "options": ["A) Evaluating different possible outcomes based on varying assumptions", "B) Predicting future trends", "C) Calculating the payback period", "D) Estimating the value of an investment"], "answer": "A) Evaluating different possible outcomes based on varying assumptions" },
+        { "type": "mc", "question": "What is the primary purpose of a financial ratio analysis?", "options": ["A) To evaluate the financial health of a company", "B) To calculate future cash flows", "C) To determine the market value of a stock", "D) To assess the risk of an investment"], "answer": "A) To evaluate the financial health of a company" },
+        { "type": "mc", "question": "What does 'weighted average cost of capital' (WACC) represent?", "options": ["A) The average rate of return a company is expected to pay to its shareholders and debt holders", "B) The cost of equity only", "C) The cost of debt only", "D) The total capital invested in a company"], "answer": "A) The average rate of return a company is expected to pay to its shareholders and debt holders" },
+        { "type": "mc", "question": "In financial planning, what does the term 'liquidity' refer to?", "options": ["A) The ability to quickly convert assets into cash", "B) The profitability of a company", "C) The overall financial stability", "D) The level of debt"], "answer": "A) The ability to quickly convert assets into cash" },
+        { "type": "mc", "question": "How is the break-even point in units calculated?", "options": ["A) Fixed Costs / (Selling Price - Variable Costs per Unit)", "B) Fixed Costs × (Selling Price - Variable Costs per Unit)", "C) (Selling Price - Variable Costs per Unit) / Fixed Costs", "D) Selling Price / (Fixed Costs - Variable Costs per Unit)"], "answer": "A) Fixed Costs / (Selling Price - Variable Costs per Unit)" },
+        { "type": "mc", "question": "What does the term 'capital budgeting' refer to?", "options": ["A) The process of planning and managing long-term investments", "B) The process of managing daily financial operations", "C) The process of analyzing short-term financing options", "D) The process of budgeting for marketing expenses"], "answer": "A) The process of planning and managing long-term investments" },
+        { "type": "mc", "question": "What is the formula for calculating the future value of a growing annuity?", "options": ["A) FV = P × ((1 + g)n - (1 + i)n) / (i - g)", "B) FV = P × (1 + i)n", "C) FV = P × ((1 + i)n - 1) / i", "D) FV = P × ((1 + g)n - 1) / g"], "answer": "A) FV = P × ((1 + g)n - (1 + i)n) / (i - g)" },
+        { "type": "mc", "question": "In investment analysis, what is the significance of the 'profitability index'?", "options": ["A) It measures the relative profitability of an investment", "B) It calculates the total return on an investment", "C) It determines the amount of risk associated with an investment", "D) It estimates the future cash flows of an investment"], "answer": "A) It measures the relative profitability of an investment" },
+        { "type": "mc", "question": "How is the present value of an ordinary annuity calculated?", "options": ["A) PV = C × (1 - (1 + i)-n) / i", "B) PV = C × (1 + i)n", "C) PV = C × (1 - (1 + i)n) / i", "D) PV = C × i / (1 + i)n"], "answer": "A) PV = C × (1 - (1 + i)-n) / i" },
+        { "type": "mc", "question": "What is the main purpose of 'financial leverage'?", "options": ["A) To amplify the returns on an investment", "B) To reduce the cost of capital", "C) To diversify investment risk", "D) To increase the liquidity of assets"], "answer": "A) To amplify the returns on an investment" },
+        { "type": "mc", "question": "What does 'duration' measure in bond investment?", "options": ["A) The sensitivity of a bond's price to changes in interest rates", "B) The total return on a bond investment", "C) The length of time until a bond matures", "D) The annual coupon payment"], "answer": "A) The sensitivity of a bond's price to changes in interest rates" },
+        { "type": "mc", "question": "In risk management, what does 'diversification' aim to achieve?", "options": ["A) To reduce the overall risk of a portfolio", "B) To maximize returns", "C) To increase the liquidity of investments", "D) To focus on a single type of investment"], "answer": "A) To reduce the overall risk of a portfolio" },
+        { "type": "mc", "question": "What is 'depreciation' in financial accounting?", "options": ["A) The allocation of the cost of a fixed asset over its useful life", "B) The increase in the value of an asset", "C) The amount of interest paid on a loan", "D) The difference between current and historical costs"], "answer": "A) The allocation of the cost of a fixed asset over its useful life" },
+        { "type": "mc", "question": "How is the capital asset pricing model (CAPM) used in finance?", "options": ["A) To determine the expected return on an investment based on its risk", "B) To calculate the intrinsic value of a stock", "C) To assess the liquidity of an asset", "D) To estimate the break-even point"], "answer": "A) To determine the expected return on an investment based on its risk" },
+        { "type": "mc", "question": "What does 'earnings before interest and taxes' (EBIT) represent?", "options": ["A) The profit generated from operations before deducting interest and taxes", "B) The net profit after interest and taxes", "C) The total revenue of a company", "D) The interest expense incurred by a company"], "answer": "A) The profit generated from operations before deducting interest and taxes" },
+        { "type": "mc", "question": "What is 'net income' in financial statements?", "options": ["A) The total revenue minus all expenses, including taxes and interest", "B) The total revenue minus the cost of goods sold", "C) The gross profit of a company", "D) The total sales of a company"], "answer": "A) The total revenue minus all expenses, including taxes and interest" },
+        { "type": "mc", "question": "How is the 'price-to-earnings' (P/E) ratio calculated?", "options": ["A) P/E Ratio = Market Price per Share / Earnings per Share", "B) P/E Ratio = Earnings per Share / Market Price per Share", "C) P/E Ratio = Net Income / Market Price per Share", "D) P/E Ratio = Market Price per Share / Net Income"], "answer": "A) P/E Ratio = Market Price per Share / Earnings per Share" },
+        { "type": "mc", "question": "What does the term 'working capital' refer to?", "options": ["A) The difference between current assets and current liabilities", "B) The total amount of cash on hand", "C) The total value of long-term assets", "D) The amount of capital invested in a company"], "answer": "A) The difference between current assets and current liabilities" },
+        { "type": "mc", "question": "What is the purpose of financial forecasting?", "options": ["A) To estimate future financial performance based on historical data", "B) To calculate the cost of capital", "C) To determine the market value of an asset", "D) To evaluate the risk of an investment"], "answer": "A) To estimate future financial performance based on historical data" },
+        { "type": "mc", "question": "In project management, what is the significance of the 'critical path'?", "options": ["A) It represents the sequence of tasks that determines the shortest project duration", "B) It is the path with the least number of tasks", "C) It is the path with the most expensive tasks", "D) It represents tasks that can be completed in parallel"], "answer": "A) It represents the sequence of tasks that determines the shortest project duration" },
+        { "type": "mc", "question": "What does 'capital expenditure' (CAPEX) refer to?", "options": ["A) Funds used by a company to acquire or upgrade physical assets", "B) Funds used for daily operations", "C) Funds used for research and development", "D) Funds used for paying off debt"], "answer": "A) Funds used by a company to acquire or upgrade physical assets" },
+        { "type": "mc", "question": "How is the 'debt-to-equity ratio' calculated?", "options": ["A) Debt-to-Equity Ratio = Total Debt / Total Equity", "B) Debt-to-Equity Ratio = Total Equity / Total Debt", "C) Debt-to-Equity Ratio = Total Liabilities / Total Assets", "D) Debt-to-Equity Ratio = Total Assets / Total Liabilities"], "answer": "A) Debt-to-Equity Ratio = Total Debt / Total Equity" },
+        { "type": "mc", "question": "Why is $100 received today worth more than $100 received one year from now?", "options": ["A) Because you can invest the money and earn more", "B) Due to inflation affecting purchasing power", "C) Because there is a risk of not receiving the money after one year", "D) All of the above"], "answer": "D) All of the above" },
+        { "type": "mc", "question": "What does the time value of money (TVM) principle state?", "options": ["A) Money received today is worth less than money received in the future", "B) Money received in the future is worth more than money received today", "C) Money received today is worth more than money received in the future", "D) Money and time have no relationship"], "answer": "C) Money received today is worth more than money received in the future" },
+        { "type": "mc", "question": "What is the formula for calculating simple interest?", "options": ["A) SI = P × n × i", "B) SI = P × (1 + i)n", "C) SI = P × i / n", "D) SI = (P + i)n"], "answer": "A) SI = P × n × i" },
+        { "type": "mc", "question": "What is the future value formula for compound interest?", "options": ["A) F = P × (1 + i)n", "B) F = P × n × i", "C) F = P + (P × i × n)", "D) F = P × i / (1 + i)n"], "answer": "A) F = P × (1 + i)n" },
+        { "type": "mc", "question": "How is compound interest different from simple interest?", "options": ["A) Simple interest is calculated on the principal only, while compound interest is calculated on the principal plus accrued interest", "B) Compound interest is calculated on the principal only", "C) Simple interest earns interest on interest", "D) Compound interest is always lower than simple interest"], "answer": "A) Simple interest is calculated on the principal only, while compound interest is calculated on the principal plus accrued interest" },
+        { "type": "mc", "question": "What does the Rule of 72 estimate?", "options": ["A) The time required to double an investment", "B) The total interest earned over time", "C) The principal amount needed to achieve a desired future value", "D) The interest rate on a loan"], "answer": "A) The time required to double an investment" },
+        { "type": "mc", "question": "How do you calculate the future value with monthly compounding?", "options": ["A) F = P × (1 + i/n)n", "B) F = P × (1 + i) × n", "C) F = P × (1 + i) × 12", "D) F = P × (1 + i/12)n"], "answer": "D) F = P × (1 + i/12)n" },
+        { "type": "mc", "question": "What is the future value of $50,000 with an 11% annual compound interest rate after 5 years?", "options": ["A) $84,253", "B) $82,650", "C) $86,446", "D) $80,000"], "answer": "C) $86,446" },
+        { "type": "mc", "question": "If $5,000 is invested at a compound interest rate of 12%, how long will it take to double the investment?", "options": ["A) 6 years", "B) 5 years", "C) 8 years", "D) 10 years"], "answer": "A) 6 years" },
+        { "type": "mc", "question": "An investor wants to double his money in 7 years. What interest rate must he earn to achieve this?", "options": ["A) 10%", "B) 9%", "C) 12%", "D) 14%"], "answer": "A) 10%" },
+        { "type": "mc", "question": "What is the purpose of the time value of money (TVM) concept in engineering economics?", "options": ["A) To determine the value of money in the future", "B) To calculate loan repayments", "C) To evaluate investment opportunities", "D) All of the above"], "answer": "D) All of the above" }
+      
+      ]
+,
+       "ar": [
+        { "type": "mc", "question": "لماذا يكون 100 دولار تحصل عليها اليوم أكثر قيمة من 100 دولار تحصل عليها بعد عام؟", "options": ["A) لأنك تستطيع استثمار المال وكسب المزيد", "B) بسبب تأثير التضخم على القوة الشرائية", "C) لأن هناك مخاطرة بعدم الحصول على المال بعد عام", "D) جميع ما ذكر"], "answer": "D) جميع ما ذكر" },
+        { "type": "mc", "question": "ما الذي ينص عليه مبدأ قيمة المال الزمنية (TVM)؟", "options": ["A) المال الذي يتم الحصول عليه اليوم أقل قيمة من المال الذي يتم الحصول عليه في المستقبل", "B) المال الذي يتم الحصول عليه في المستقبل أكثر قيمة من المال الذي يتم الحصول عليه اليوم", "C) المال الذي يتم الحصول عليه اليوم أكثر قيمة من المال الذي يتم الحصول عليه في المستقبل", "D) المال والزمن ليس لهما علاقة"], "answer": "C) المال الذي يتم الحصول عليه اليوم أكثر قيمة من المال الذي يتم الحصول عليه في المستقبل" },
+        { "type": "mc", "question": "ما هي صيغة حساب الفائدة البسيطة؟", "options": ["A) SI = P × n × i", "B) SI = P × (1 + i)n", "C) SI = P × i / n", "D) SI = (P + i)n"], "answer": "A) SI = P × n × i" },
+        { "type": "mc", "question": "ما هي صيغة حساب القيمة المستقبلية للفائدة المركبة؟", "options": ["A) F = P × (1 + i)n", "B) F = P × n × i", "C) F = P + (P × i × n)", "D) F = P × i / (1 + i)n"], "answer": "A) F = P × (1 + i)n" },
+        { "type": "mc", "question": "كيف تختلف الفائدة المركبة عن الفائدة البسيطة؟", "options": ["A) الفائدة البسيطة تحسب على رأس المال فقط، بينما الفائدة المركبة تحسب على رأس المال بالإضافة إلى الفوائد المكتسبة", "B) الفائدة المركبة تحسب على رأس المال فقط", "C) الفائدة البسيطة تكسب فوائد على الفوائد", "D) الفائدة المركبة تكون دائمًا أقل من الفائدة البسيطة"], "answer": "A) الفائدة البسيطة تحسب على رأس المال فقط، بينما الفائدة المركبة تحسب على رأس المال بالإضافة إلى الفوائد المكتسبة" },
+        { "type": "mc", "question": "ما هو الغرض من قاعدة الـ72؟", "options": ["A) تقدير الوقت اللازم لمضاعفة الاستثمار", "B) حساب إجمالي الفوائد المكتسبة على مر الزمن", "C) حساب المبلغ الأساسي المطلوب لتحقيق قيمة مستقبلية معينة", "D) حساب سعر الفائدة على قرض"], "answer": "A) تقدير الوقت اللازم لمضاعفة الاستثمار" },
+        { "type": "mc", "question": "كيف تحسب القيمة المستقبلية مع التركيب الشهري للفائدة؟", "options": ["A) F = P × (1 + i/n)n", "B) F = P × (1 + i) × n", "C) F = P × (1 + i) × 12", "D) F = P × (1 + i/12)n"], "answer": "D) F = P × (1 + i/12)n" },
+        { "type": "mc", "question": "ما هي القيمة المستقبلية لمبلغ 50,000 دولار بمعدل فائدة مركبة سنوي 11٪ بعد 5 سنوات؟", "options": ["A) 84,253 دولار", "B) 82,650 دولار", "C) 86,446 دولار", "D) 80,000 دولار"], "answer": "C) 86,446 دولار" },
+        { "type": "mc", "question": "إذا تم استثمار 5,000 دولار بمعدل فائدة مركبة 12٪، كم من الوقت سيستغرق لمضاعفة الاستثمار؟", "options": ["A) 6 سنوات", "B) 5 سنوات", "C) 8 سنوات", "D) 10 سنوات"], "answer": "A) 6 سنوات" },
+        { "type": "mc", "question": "يريد مستثمر مضاعفة ماله في 7 سنوات. ما هو معدل الفائدة الذي يجب أن يحققه لتحقيق ذلك؟", "options": ["A) 10٪", "B) 9٪", "C) 12٪", "D) 14٪"], "answer": "A) 10٪" },
+        { "type": "mc", "question": "ما هو الغرض من مفهوم قيمة المال الزمنية (TVM) في الاقتصاد الهندسي؟", "options": ["A) تحديد قيمة المال في المستقبل", "B) حساب سداد القروض", "C) تقييم الفرص الاستثمارية", "D) جميع ما ذكر"], "answer": "D) جميع ما ذكر" },
+        { "type": "mc", "question": "ما هي الصيغة لحساب القيمة الحالية لمبلغ مستقبلي؟", "options": ["A) PV = FV / (1 + i)n", "B) PV = FV × (1 + i)n", "C) PV = FV × (1 - i)n", "D) PV = FV × i / (1 + i)n"], "answer": "A) PV = FV / (1 + i)n" },
+        { "type": "mc", "question": "إذا قمت بإيداع 1000 دولار في حساب توفير بمعدل فائدة سنوي قدره 5٪، ما هو المبلغ المتوقع بعد 3 سنوات إذا كانت الفائدة مركبة سنويًا؟", "options": ["A) 1157.63 دولار", "B) 1150.00 دولار", "C) 1160.00 دولار", "D) 1200.00 دولار"], "answer": "A) 1157.63 دولار" },
+        { "type": "mc", "question": "كيف تحسب معدل النسبة المئوية السنوية (APR)؟", "options": ["A) APR = (إجمالي الفائدة / رأس المال) × 100", "B) APR = (إجمالي الفائدة / القرض) × 100", "C) APR = (معدل الفائدة / عدد الفترات) × 100", "D) APR = (الدفعة الشهرية / القرض) × 100"], "answer": "B) APR = (إجمالي الفائدة / رأس المال) × 100" },
+        { "type": "mc", "question": "ماذا يقيس مصطلح 'القيمة الحالية الصافية' (NPV)؟", "options": ["A) الفرق بين القيمة الحالية للتدفقات النقدية الداخلة والخارجة", "B) إجمالي تكلفة الاستثمار", "C) القيمة المستقبلية للاستثمار", "D) التدفق النقدي السنوي للاستثمار"], "answer": "B) الفرق بين القيمة الحالية للتدفقات النقدية الداخلة والخارجة" },
+        { "type": "mc", "question": "في تحليل الميزانية الرأسمالية، ما هو الهدف من تحليل فترة الاسترداد؟", "options": ["A) تحديد مدى ربحية الاستثمار", "B) حساب العائد على الاستثمار", "C) قياس المدة التي يستغرقها استرداد الاستثمار الأولي", "D) تقييم المخاطر المرتبطة بالاستثمار"], "answer": "C) قياس المدة التي يستغرقها استرداد الاستثمار الأولي" },
+        { "type": "mc", "question": "ما هو العائد السنوي؟", "options": ["A) سلسلة من المدفوعات المتساوية التي تتم في فترات منتظمة", "B) دفعة واحدة تتم في نهاية الفترة", "C) قرض بمعدلات فائدة متغيرة", "D) نوع من الاستثمارات ذات المخاطر العالية"], "answer": "A) سلسلة من المدفوعات المتساوية التي تتم في فترات منتظمة" },
+        { "type": "mc", "question": "ماذا يمثل 'معدل العائد الداخلي' (IRR)؟", "options": ["A) المعدل الذي تتساوى فيه القيمة الحالية الصافية مع الصفر", "B) النسبة المئوية السنوية للعائد على الاستثمار", "C) معدل الفائدة على القرض", "D) إجمالي العائد على الاستثمار طوال فترة حياته"], "answer": "A) المعدل الذي تتساوى فيه القيمة الحالية الصافية مع الصفر" },
+        { "type": "mc", "question": "كيف يتم حساب القيمة المستقبلية للعائد؟", "options": ["A) FV = P × ((1 + i)n - 1) / i", "B) FV = P × (1 + i)n", "C) FV = P × (1 - i)n", "D) FV = P × i / (1 + i)n"], "answer": "A) FV = P × ((1 + i)n - 1) / i" },
+        { "type": "mc", "question": "ما هو الغرض من تحليل نقطة التعادل؟", "options": ["A) تحديد حجم المبيعات اللازم لتغطية التكاليف الثابتة والمتغيرة", "B) حساب ربحية مشروع جديد", "C) تقدير الطلب في السوق على منتج", "D) تقييم العائد على الاستثمار"], "answer": "A) تحديد حجم المبيعات اللازم لتغطية التكاليف الثابتة والمتغيرة" },
+        { "type": "mc", "question": "كيف يتم حساب القيمة الحالية للمعاش المستمر؟", "options": ["A) PV = C / i", "B) PV = C × (1 + i)n", "C) PV = C / (1 + i)n", "D) PV = C × i / (1 + i)n"], "answer": "A) PV = C / i" },
+        { "type": "mc", "question": "ما هي الصيغة لحساب القيمة الحالية لدفعة مستقبلية واحدة؟", "options": ["A) PV = FV / (1 + i)n", "B) PV = FV × (1 + i)n", "C) PV = FV × (1 - i)n", "D) PV = FV × i / (1 + i)n"], "answer": "A) PV = FV / (1 + i)n" },
+        { "type": "mc", "question": "ما هو الغرض من استخدام معدل الخصم في حساب القيمة الحالية؟", "options": ["A) أخذ قيمة الزمن في المال بعين الاعتبار", "B) تحديد القيمة المستقبلية", "C) حساب معدل الفائدة", "D) تقدير تكاليف المشروع"], "answer": "A) أخذ قيمة الزمن في المال بعين الاعتبار" },
+        { "type": "mc", "question": "ماذا يمثل 'معدل الفائدة الفعلي السنوي' (EAR)؟", "options": ["A) معدل الفائدة السنوي الذي يأخذ في اعتباره التركيب", "B) معدل الفائدة قبل التركيب", "C) معدل الفائدة الاسمي", "D) معدل العائد على الاستثمار"], "answer": "A) معدل الفائدة السنوي الذي يأخذ في اعتباره التركيب" },
+        { "type": "mc", "question": "في نمذجة المالية، ماذا يتضمن 'تحليل السيناريو'؟", "options": ["A) تقييم نتائج مختلفة بناءً على افتراضات متغيرة", "B) التنبؤ بالاتجاهات المستقبلية", "C) حساب فترة الاسترداد", "D) تقدير قيمة الاستثمار"], "answer": "A) تقييم نتائج مختلفة بناءً على افتراضات متغيرة" },
+        { "type": "mc", "question": "ما هو الغرض الأساسي من تحليل النسب المالية؟", "options": ["A) تقييم الصحة المالية للشركة", "B) حساب التدفقات النقدية المستقبلية", "C) تحديد القيمة السوقية للسهم", "D) تقييم مخاطر الاستثمار"], "answer": "A) تقييم الصحة المالية للشركة" },
+        { "type": "mc", "question": "ماذا يمثل 'معدل تكلفة رأس المال الموزون' (WACC)؟", "options": ["A) متوسط معدل العائد الذي يتوقع أن تدفعه الشركة لمساهميها والمقرضين", "B) تكلفة حقوق الملكية فقط", "C) تكلفة الدين فقط", "D) إجمالي رأس المال المستثمر في الشركة"], "answer": "A) متوسط معدل العائد الذي يتوقع أن تدفعه الشركة لمساهميها والمقرضين" },
+        { "type": "mc", "question": "في التخطيط المالي، ماذا يشير مصطلح 'السيولة'؟", "options": ["A) القدرة على تحويل الأصول بسرعة إلى نقد", "B) ربحية الشركة", "C) الاستقرار المالي العام", "D) مستوى الدين"], "answer": "A) القدرة على تحويل الأصول بسرعة إلى نقد" },
+        { "type": "mc", "question": "كيف يتم حساب نقطة التعادل بالوحدات؟", "options": ["A) التكاليف الثابتة / (سعر البيع - التكاليف المتغيرة لكل وحدة)", "B) التكاليف الثابتة × (سعر البيع - التكاليف المتغيرة لكل وحدة)", "C) (سعر البيع - التكاليف المتغيرة لكل وحدة) / التكاليف الثابتة", "D) سعر البيع / (التكاليف الثابتة - التكاليف المتغيرة لكل وحدة)"], "answer": "A) التكاليف الثابتة / (سعر البيع - التكاليف المتغيرة لكل وحدة)" },
+        { "type": "mc", "question": "ماذا يعني مصطلح 'الميزانية الرأسمالية'؟", "options": ["A) عملية التخطيط وإدارة الاستثمارات الطويلة الأجل", "B) عملية إدارة العمليات المالية اليومية", "C) عملية تحليل خيارات التمويل القصير الأجل", "D) عملية إعداد الميزانية لمصاريف التسويق"], "answer": "A) عملية التخطيط وإدارة الاستثمارات الطويلة الأجل" },
+        { "type": "mc", "question": "ما هي الصيغة لحساب القيمة المستقبلية لمعادلة متزايدة؟", "options": ["A) FV = P × ((1 + g)n - (1 + i)n) / (i - g)", "B) FV = P × (1 + i)n", "C) FV = P × ((1 + i)n - 1) / i", "D) FV = P × ((1 + g)n - 1) / g"], "answer": "A) FV = P × ((1 + g)n - (1 + i)n) / (i - g)" },
+        { "type": "mc", "question": "في تحليل الاستثمار، ما أهمية 'مؤشر الربحية'؟", "options": ["A) يقيس ربحية الاستثمار بالنسبة", "B) يحسب العائد الإجمالي على الاستثمار", "C) يحدد مقدار المخاطر المرتبطة بالاستثمار", "D) يقدر التدفقات النقدية المستقبلية للاستثمار"], "answer": "A) يقيس ربحية الاستثمار بالنسبة" },
+        { "type": "mc", "question": "كيف يتم حساب القيمة الحالية للمعاش العادي؟", "options": ["A) PV = C × (1 - (1 + i)-n) / i", "B) PV = C × (1 + i)n", "C) PV = C × (1 - (1 + i)n) / i", "D) PV = C × i / (1 + i)n"], "answer": "A) PV = C × (1 - (1 + i)-n) / i" },
+        { "type": "mc", "question": "ما هو الغرض من 'الرافعة المالية'؟", "options": ["A) تضخيم العوائد على الاستثمار", "B) تقليل تكلفة رأس المال", "C) تنويع مخاطر الاستثمار", "D) زيادة سيولة الأصول"], "answer": "A) تضخيم العوائد على الاستثمار" },
+        { "type": "mc", "question": "ماذا يقيس 'المدة' في استثمار السندات؟", "options": ["A) حساسية سعر السند لتغيرات أسعار الفائدة", "B) إجمالي العائد على استثمار السندات", "C) طول الفترة الزمنية حتى استحقاق السند", "D) الدفعة السنوية للقسيمة"], "answer": "A) حساسية سعر السند لتغيرات أسعار الفائدة" },
+        { "type": "mc", "question": "في إدارة المخاطر، ما الهدف من 'تنويع الاستثمارات'؟", "options": ["A) تقليل المخاطر الإجمالية لمحفظة الاستثمار", "B) تعظيم العوائد", "C) زيادة سيولة الاستثمارات", "D) التركيز على نوع واحد من الاستثمار"], "answer": "A) تقليل المخاطر الإجمالية لمحفظة الاستثمار" },
+        { "type": "mc", "question": "ما هو 'الاستهلاك' في المحاسبة المالية؟", "options": ["A) تخصيص تكلفة الأصول الثابتة على مدى عمرها المفيد", "B) زيادة قيمة الأصل", "C) مبلغ الفائدة المدفوعة على قرض", "D) الفرق بين التكلفة الحالية والتكلفة التاريخية"], "answer": "A) تخصيص تكلفة الأصول الثابتة على مدى عمرها المفيد" },
+        { "type": "mc", "question": "كيف يُستخدم نموذج تسعير الأصول الرأسمالية (CAPM) في المالية؟", "options": ["A) لتحديد العائد المتوقع على الاستثمار بناءً على مخاطره", "B) لحساب القيمة الجوهرية للسهم", "C) لتقييم سيولة الأصل", "D) لتقدير نقطة التعادل"], "answer": "A) لتحديد العائد المتوقع على الاستثمار بناءً على مخاطره" },
+        { "type": "mc", "question": "ماذا يمثل 'الأرباح قبل الفوائد والضرائب' (EBIT)؟", "options": ["A) الأرباح الناتجة عن العمليات قبل خصم الفوائد والضرائب", "B) صافي الربح بعد الفوائد والضرائب", "C) إجمالي إيرادات الشركة", "D) مصاريف الفوائد التي تتحملها الشركة"], "answer": "A) الأرباح الناتجة عن العمليات قبل خصم الفوائد والضرائب" },
+        { "type": "mc", "question": "ما هو 'صافي الدخل' في البيانات المالية؟", "options": ["A) إجمالي الإيرادات ناقص جميع المصاريف، بما في ذلك الضرائب والفوائد", "B) إجمالي الإيرادات ناقص تكلفة البضائع المباعة", "C) الربح الإجمالي للشركة", "D) إجمالي مبيعات الشركة"], "answer": "A) إجمالي الإيرادات ناقص جميع المصاريف، بما في ذلك الضرائب والفوائد" },
+        { "type": "mc", "question": "كيف يتم حساب 'نسبة السعر إلى الأرباح' (P/E)؟", "options": ["A) نسبة السعر إلى الأرباح = سعر السوق للسهم / الأرباح لكل سهم", "B) نسبة السعر إلى الأرباح = الأرباح لكل سهم / سعر السوق للسهم", "C) نسبة السعر إلى الأرباح = صافي الدخل / سعر السوق للسهم", "D) نسبة السعر إلى الأرباح = سعر السوق للسهم / صافي الدخل"], "answer": "A) نسبة السعر إلى الأرباح = سعر السوق للسهم / الأرباح لكل سهم" },
+        { "type": "mc", "question": "ماذا يمثل مصطلح 'رأس المال العامل'؟", "options": ["A) الفرق بين الأصول الحالية والخصوم الحالية", "B) إجمالي مبلغ النقد المتاح", "C) إجمالي قيمة الأصول طويلة الأجل", "D) مقدار رأس المال المستثمر في الشركة"], "answer": "A) الفرق بين الأصول الحالية والخصوم الحالية" },
+        { "type": "mc", "question": "ما هو هدف التنبؤ المالي؟", "options": ["A) تقدير الأداء المالي المستقبلي بناءً على البيانات التاريخية", "B) حساب تكلفة رأس المال", "C) تحديد القيمة السوقية لأصل", "D) تقييم مخاطر الاستثمار"], "answer": "A) تقدير الأداء المالي المستقبلي بناءً على البيانات التاريخية" },
+        { "type": "mc", "question": "في إدارة المشاريع، ما أهمية 'المسار الحرج'؟", "options": ["A) يمثل تسلسل المهام الذي يحدد أقصر مدة للمشروع", "B) هو المسار الذي يحتوي على أقل عدد من المهام", "C) هو المسار الذي يحتوي على أغلى المهام", "D) يمثل المهام التي يمكن إنجازها بشكل متوازٍ"], "answer": "A) يمثل تسلسل المهام الذي يحدد أقصر مدة للمشروع" },
+        { "type": "mc", "question": "ما هو 'الإنفاق الرأسمالي' (CAPEX)؟", "options": ["A) الأموال المستخدمة من قبل الشركة للحصول على أو ترقية الأصول المادية", "B) الأموال المستخدمة في العمليات اليومية", "C) الأموال المستخدمة في البحث والتطوير", "D) الأموال المستخدمة في سداد الديون"], "answer": "A) الأموال المستخدمة من قبل الشركة للحصول على أو ترقية الأصول المادية" },
+        { "type": "mc", "question": "كيف يتم حساب 'نسبة الدين إلى حقوق الملكية'؟", "options": ["A) نسبة الدين إلى حقوق الملكية = إجمالي الدين / إجمالي حقوق الملكية", "B) نسبة الدين إلى حقوق الملكية = إجمالي حقوق الملكية / إجمالي الدين", "C) نسبة الدين إلى حقوق الملكية = إجمالي الالتزامات / إجمالي الأصول", "D) نسبة الدين إلى حقوق الملكية = إجمالي الأصول / إجمالي الالتزامات"], "answer": "A) نسبة الدين إلى حقوق الملكية = إجمالي الدين / إجمالي حقوق الملكية" }
+      ]
+        
+
+
+
+      };
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+        let selectedLanguage = 'en';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+        });
+
+        function updateRangeValues() {
+            const mcRange = document.getElementById('mcCount');
+            mcRange.max = questions[selectedLanguage].filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function startExam() {
+            selectedLanguage = document.getElementById('languageSelect').value;
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const mcQuestions = questions[selectedLanguage].filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return mcQuestions;
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = true;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((q, index) => {
+                if (userAnswers[index] === q.answer) {
+                    score++;
+                    correctAnswers.push(index + 1);
+                }
+            });
+            document.getElementById('resultContainer').innerHTML = `
+                <div class="result">
+                    <h2>Results</h2>
+                    <p>You scored ${score} out of ${selectedQuestions.length}.</p>
+                    <p>Correct answers: ${correctAnswers.join(', ')}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

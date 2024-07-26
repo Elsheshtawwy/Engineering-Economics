@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch6</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>ِChapter6 Exam</h1>
+            <label class="slider-label">Select Language:</label>
+            <select id="languageSelect">
+                <option value="en">English</option>
+                <option value="ar">Arabic</option>
+            </select>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>
+           const questions = {
+        en: [
+  { "type": "mc", "question": "When analyzing the economic feasibility of a project or design, what should you compare its cash flow with?", "options": ["A) The project’s budget", "B) The cash flow of other alternatives", "C) The project’s timeline", "D) The project’s milestones"], "answer": "B) The cash flow of other alternatives" },
+  { "type": "mc", "question": "What is the initial investment amount for the 6-month project starting on January 1?", "options": ["A) $1,000", "B) $1,500", "C) $2,000", "D) $3,000"], "answer": "B) $1,500" },
+  { "type": "mc", "question": "In the categories of cash flows, what does O&M stand for?", "options": ["A) Overhaul and Maintenance", "B) Operations and Maintenance", "C) Operations and Management", "D) Overhaul and Management"], "answer": "B) Operations and Maintenance" },
+  { "type": "mc", "question": "What is the expected annual income from mowing lawns in the cash flow diagram example?", "options": ["A) $180", "B) $600", "C) $720", "D) $175"], "answer": "C) $720" },
+  { "type": "mc", "question": "In the borrower’s perspective of taking out a loan, what is considered an inflow?", "options": ["A) The amount repaid", "B) The amount borrowed", "C) The interest paid", "D) The interest received"], "answer": "B) The amount borrowed" },
+  { "type": "mc", "question": "What does a cash flow diagram (CFD) specifically illustrate?", "options": ["A) The timeline of the project", "B) The expenses and receipts", "C) The size, sign, and timing of individual cash flows", "D) The project’s milestones"], "answer": "C) The size, sign, and timing of individual cash flows" },
+  { "type": "mc", "question": "What is the salvage value of the lawn mower after 3 years in the example?", "options": ["A) $100", "B) $150", "C) $175", "D) $200"], "answer": "C) $175" },
+  { "type": "mc", "question": "What is the interest rate for the loan in the cash flow diagram example involving a borrower and a bank?", "options": ["A) 5%", "B) 6%", "C) 7%", "D) 8%"], "answer": "D) 8%" },
+  { "type": "mc", "question": "In the example of a lawn mower, what is the total maintenance cost over 3 years?", "options": ["A) $180", "B) $360", "C) $540", "D) $720"], "answer": "B) $540" },
+  { "type": "mc", "question": "What is considered an outflow in the lender’s perspective of a loan?", "options": ["A) The amount borrowed", "B) The amount repaid", "C) The interest received", "D) The interest paid"], "answer": "A) The amount borrowed" },
+  { "type": "mc", "question": "In a cash flow diagram, how are positive cash flows usually drawn?", "options": ["A) Downward from the timeline", "B) Upward from the timeline", "C) Horizontally from the timeline", "D) Diagonally from the timeline"], "answer": "B) Upward from the timeline" },
+  { "type": "mc", "question": "What is the principal amount borrowed by a man in the cash flow diagram example at 8% interest?", "options": ["A) $500", "B) $1,000", "C) $1,500", "D) $2,000"], "answer": "B) $1,000" },
+  { "type": "mc", "question": "What happens at the end of the first year in the cash flow diagram example with a borrower?", "options": ["A) The borrower repays half of the principal plus interest", "B) The borrower repays the full principal plus interest", "C) The borrower repays only the interest", "D) The borrower repays nothing"], "answer": "A) The borrower repays half of the principal plus interest" },
+  { "type": "mc", "question": "What is the cash flow at the end of year 0 for the man who borrowed $1,000 at 8% interest?", "options": ["A) +$1,000", "B) -$1,000", "C) +$500", "D) -$500"], "answer": "A) +$1,000" },
+  { "type": "mc", "question": "What is the total repayment amount at the end of the second year for the borrower at 8% interest?", "options": ["A) $500", "B) $540", "C) $1,040", "D) $1,080"], "answer": "B) $540" },
+  { "type": "mc", "question": "What does the overhaul category in cash flows represent?", "options": ["A) Minor repairs", "B) Annual expenses", "C) Major capital expenditure during the asset’s life", "D) Initial investment"], "answer": "C) Major capital expenditure during the asset’s life" },
+  { "type": "mc", "question": "How is a transfer of money classified in a cash flow diagram?", "options": ["A) Always an inflow", "B) Always an outflow", "C) Inflow or outflow depending on perspective", "D) Neither inflow nor outflow"], "answer": "C) Inflow or outflow depending on perspective" },
+  { "type": "mc", "question": "What is the annual interest rate mentioned in the example where a person borrowed money and has three end-of-year payments?", "options": ["A) 5%", "B) 6%", "C) 8%", "D) 10%"], "answer": "D) 10%" },
+  { "type": "mc", "question": "In cash flow analysis, what does the term 'salvage value' refer to?", "options": ["A) Initial investment", "B) Annual maintenance cost", "C) Receipt at project termination for sale or transfer of equipment", "D) Annual income"], "answer": "C) Receipt at project termination for sale or transfer of equipment" },
+  { "type": "mc", "question": "What is the net cash flow at the end of the first year for the borrower repaying half of $1,000 principal plus 8% interest?", "options": ["A) -$580", "B) -$540", "C) +$580", "D) +$540"], "answer": "A) -$580" },
+  { "type": "mc", "question": "What is the cash flow at the end of the third year in the loan example with three end-of-year payments?", "options": ["A) +$1,100", "B) +$1,200", "C) +$1,300", "D) +$3,000"], "answer": "A) +$1,100" },
+  { "type": "mc", "question": "How is the cash flow diagram (CFD) created initially?", "options": ["A) Drawing a segmented time-based horizontal line", "B) Drawing a continuous vertical line", "C) Drawing a diagonal line", "D) Drawing circles"], "answer": "A) Drawing a segmented time-based horizontal line" },
+  { "type": "mc", "question": "What is the total income from mowing lawns over 3 years in the cash flow diagram example?", "options": ["A) $1,800", "B) $2,160", "C) $2,520", "D) $2,880"], "answer": "C) $2,160" },
+  { "type": "mc", "question": "In the cash flow diagram example, what is the net cash flow at the end of the third year?", "options": ["A) +$715", "B) +$720", "C) +$725", "D) +$730"], "answer": "A) +$715" },
+  { "type": "mc", "question": "In the borrower’s perspective, what does a loan taken out for $5,000 at 6% interest represent?", "options": ["A) An inflow", "B) An outflow", "C) No cash flow", "D) A net cash flow"], "answer": "A) An inflow" },
+  { "type": "mc", "question": "How is the cash flow diagram useful in engineering economic analysis?", "options": ["A) It shows the project’s budget", "B) It illustrates the size, sign, and timing of cash flows", "C) It represents the project’s milestones", "D) It indicates the timeline of the project"], "answer": "B) It illustrates the size, sign, and timing of cash flows" },
+  { "type": "mc", "question": "In the cash flow diagram example, what is the cash outflow for the loan repayment at the end of the second year?", "options": ["A) -$540", "B) -$580", "C) -$1,040", "D) -$1,080"], "answer": "A) -$540" },
+  { "type": "mc", "question": "What does the inflow category in a cash flow diagram typically include?", "options": ["A) Loan repayments", "B) Interest payments", "C) Borrowed amounts", "D) Expenses"], "answer": "C) Borrowed amounts" },
+  { "type": "mc", "question": "What is the final cash flow at the end of the third year for the borrower repaying three end-of-year payments at 10% interest?", "options": ["A) -$1,000", "B) -$1,100", "C) -$1,200", "D) -$3,000"], "answer": "B) -$1,100" },
+  { "type": "mc", "question": "What is the purpose of creating a cash flow diagram in project analysis?", "options": ["A) To determine the project’s duration", "B) To visualize cash inflows and outflows over time", "C) To set the project’s milestones", "D) To establish the project’s budget"], "answer": "B) To visualize cash inflows and outflows over time" },
+  { "type": "mc", "question": "What is the total maintenance cost for the lawn mower over 3 years in the cash flow diagram example?", "options": ["A) $300", "B) $450", "C) $600", "D) $900"], "answer": "B) $450" },
+  { "type": "mc", "question": "What does the term 'inflow' mean in the context of cash flows?", "options": ["A) An expense", "B) A revenue", "C) A loan repayment", "D) An investment"], "answer": "B) A revenue" },
+  { "type": "mc", "question": "What is the interest rate on the loan in the example where a person has three end-of-year payments?", "options": ["A) 5%", "B) 7%", "C) 9%", "D) 10%"], "answer": "D) 10%" },
+  { "type": "mc", "question": "What is the cash flow at the end of the first year in the loan example with a $1,000 principal and 8% interest?", "options": ["A) -$540", "B) -$580", "C) +$540", "D) +$580"], "answer": "A) -$540" },
+  { "type": "mc", "question": "What is the net cash flow at the end of the third year in the cash flow diagram example?", "options": ["A) +$1,040", "B) +$1,080", "C) +$1,100", "D) +$3,000"], "answer": "B) +$1,080" },
+  { "type": "mc", "question": "In cash flow analysis, what does the term 'outflow' refer to?", "options": ["A) A loan repayment", "B) An expense", "C) A revenue", "D) An investment"], "answer": "B) An expense" },
+  { "type": "mc", "question": "What is the purpose of comparing cash flows in economic feasibility analysis?", "options": ["A) To set the project’s budget", "B) To visualize the timeline", "C) To choose the most cost-effective alternative", "D) To establish the project’s milestones"], "answer": "C) To choose the most cost-effective alternative" }
+      ],
+        ar: [
+  { "type": "mc", "question": "عند تحليل الجدوى الاقتصادية لمشروع أو تصميم، ما الذي يجب مقارنة تدفقه النقدي به؟", "options": ["A) ميزانية المشروع", "B) تدفق النقدي للبدائل الأخرى", "C) الجدول الزمني للمشروع", "D) معالم المشروع"], "answer": "B) تدفق النقدي للبدائل الأخرى" },
+  { "type": "mc", "question": "ما هو مبلغ الاستثمار الأولي للمشروع الذي يستمر لمدة 6 أشهر ويبدأ في الأول من يناير؟", "options": ["A) 1000 دولار", "B) 1500 دولار", "C) 2000 دولار", "D) 3000 دولار"], "answer": "B) 1500 دولار" },
+  { "type": "mc", "question": "في فئات التدفقات النقدية، ماذا تعني O&M؟", "options": ["A) الإصلاح والصيانة", "B) العمليات والصيانة", "C) العمليات والإدارة", "D) الإصلاح والإدارة"], "answer": "B) العمليات والصيانة" },
+  { "type": "mc", "question": "ما هو الدخل السنوي المتوقع من جز العشب في مثال مخطط التدفق النقدي؟", "options": ["A) 180 دولار", "B) 600 دولار", "C) 720 دولار", "D) 175 دولار"], "answer": "C) 720 دولار" },
+  { "type": "mc", "question": "في وجهة نظر المقترض عند أخذ قرض، ما الذي يعتبر تدفقاً داخلياً؟", "options": ["A) المبلغ المسدد", "B) المبلغ المقترض", "C) الفائدة المدفوعة", "D) الفائدة المستلمة"], "answer": "B) المبلغ المقترض" },
+  { "type": "mc", "question": "ما الذي يصور بالتحديد مخطط التدفق النقدي (CFD)؟", "options": ["A) الجدول الزمني للمشروع", "B) المصاريف والإيصالات", "C) حجم، علامة، وتوقيت التدفقات النقدية الفردية", "D) معالم المشروع"], "answer": "C) حجم، علامة، وتوقيت التدفقات النقدية الفردية" },
+  { "type": "mc", "question": "ما هي قيمة الإنقاذ لآلة جز العشب بعد 3 سنوات في المثال؟", "options": ["A) 100 دولار", "B) 150 دولار", "C) 175 دولار", "D) 200 دولار"], "answer": "C) 175 دولار" },
+  { "type": "mc", "question": "ما هو معدل الفائدة للقرض في مثال مخطط التدفق النقدي الذي يتضمن مقترض وبنك؟", "options": ["A) 5%", "B) 6%", "C) 7%", "D) 8%"], "answer": "D) 8%" },
+  { "type": "mc", "question": "في مثال آلة جز العشب، ما هو إجمالي تكلفة الصيانة على مدى 3 سنوات؟", "options": ["A) 180 دولار", "B) 360 دولار", "C) 540 دولار", "D) 720 دولار"], "answer": "B) 540 دولار" },
+  { "type": "mc", "question": "ما الذي يعتبر تدفقاً خارجياً في وجهة نظر المقرض عند إعطاء قرض؟", "options": ["A) المبلغ المقترض", "B) المبلغ المسدد", "C) الفائدة المستلمة", "D) الفائدة المدفوعة"], "answer": "A) المبلغ المقترض" },
+  { "type": "mc", "question": "في مخطط التدفق النقدي، كيف يتم رسم التدفقات النقدية الإيجابية عادة؟", "options": ["A) للأسفل من الجدول الزمني", "B) للأعلى من الجدول الزمني", "C) أفقياً من الجدول الزمني", "D) بزاوية من الجدول الزمني"], "answer": "B) للأعلى من الجدول الزمني" },
+  { "type": "mc", "question": "ما هو مبلغ القرض الذي اقترضه رجل في مثال مخطط التدفق النقدي عند 8% فائدة؟", "options": ["A) 500 دولار", "B) 1000 دولار", "C) 1500 دولار", "D) 2000 دولار"], "answer": "B) 1000 دولار" },
+  { "type": "mc", "question": "ماذا يحدث في نهاية السنة الأولى في مثال مخطط التدفق النقدي مع المقترض؟", "options": ["A) يقوم المقترض بسداد نصف رأس المال بالإضافة إلى الفائدة", "B) يقوم المقترض بسداد رأس المال الكامل بالإضافة إلى الفائدة", "C) يقوم المقترض بسداد الفائدة فقط", "D) لا يسدد المقترض شيئاً"], "answer": "A) يقوم المقترض بسداد نصف رأس المال بالإضافة إلى الفائدة" },
+  { "type": "mc", "question": "ما هو التدفق النقدي في نهاية السنة 0 للرجل الذي اقترض 1000 دولار عند 8% فائدة؟", "options": ["A) +1000 دولار", "B) -1000 دولار", "C) +500 دولار", "D) -500 دولار"], "answer": "A) +1000 دولار" },
+  { "type": "mc", "question": "ما هو إجمالي مبلغ السداد في نهاية السنة الثانية للمقترض عند 8% فائدة؟", "options": ["A) 500 دولار", "B) 540 دولار", "C) 1040 دولار", "D) 1080 دولار"], "answer": "B) 540 دولار" },
+  { "type": "mc", "question": "ماذا يمثل فئة الإصلاحات في التدفقات النقدية؟", "options": ["A) إصلاحات طفيفة", "B) نفقات سنوية", "C) نفقات رأس المال الرئيسية خلال فترة حياة الأصل", "D) استثمار أولي"], "answer": "C) نفقات رأس المال الرئيسية خلال فترة حياة الأصل" },
+  { "type": "mc", "question": "كيف يتم تصنيف تحويل الأموال في مخطط التدفق النقدي؟", "options": ["A) دائماً تدفق داخلي", "B) دائماً تدفق خارجي", "C) تدفق داخلي أو خارجي بناءً على المنظور", "D) ليس تدفق داخلي ولا خارجي"], "answer": "C) تدفق داخلي أو خارجي بناءً على المنظور" },
+  { "type": "mc", "question": "ما هو معدل الفائدة السنوي المذكور في المثال حيث اقترض شخص المال وله ثلاث دفعات في نهاية السنة؟", "options": ["A) 5%", "B) 6%", "C) 8%", "D) 10%"], "answer": "D) 10%" },
+  { "type": "mc", "question": "في تحليل التدفقات النقدية، ماذا تعني قيمة الإنقاذ؟", "options": ["A) استثمار أولي", "B) تكلفة الصيانة السنوية", "C) إيصال عند إنهاء المشروع لبيع أو نقل المعدات", "D) دخل سنوي"], "answer": "C) إيصال عند إنهاء المشروع لبيع أو نقل المعدات" },
+  { "type": "mc", "question": "ما هو التدفق النقدي الصافي في نهاية السنة الأولى للمقترض الذي يسدد نصف رأس المال 1000 دولار بالإضافة إلى فائدة 8%؟", "options": ["A) -580 دولار", "B) -540 دولار", "C) +580 دولار", "D) +540 دولار"], "answer": "A) -580 دولار" },
+  { "type": "mc", "question": "ما هو التدفق النقدي في نهاية السنة الثالثة في مثال القرض مع ثلاث دفعات في نهاية السنة؟", "options": ["A) +1100 دولار", "B) +1200 دولار", "C) +1300 دولار", "D) +3000 دولار"], "answer": "A) +1100 دولار" },
+  { "type": "mc", "question": "كيف يتم إنشاء مخطط التدفق النقدي (CFD) في البداية؟", "options": ["A) رسم خط أفقي مقسم بناءً على الوقت", "B) رسم خط عمودي مستمر", "C) رسم خط مائل", "D) رسم دوائر"], "answer": "A) رسم خط أفقي مقسم بناءً على الوقت" },
+  { "type": "mc", "question": "ما هو إجمالي الدخل من جز العشب على مدى 3 سنوات في مثال مخطط التدفق النقدي؟", "options": ["A) 1800 دولار", "B) 2160 دولار", "C) 2520 دولار", "D) 2880 دولار"], "answer": "C) 2160 دولار" },
+  { "type": "mc", "question": "في مثال مخطط التدفق النقدي، ما هو التدفق النقدي الصافي في نهاية السنة الثالثة؟", "options": ["A) +715 دولار", "B) +720 دولار", "C) +725 دولار", "D) +730 دولار"], "answer": "A) +715 دولار" },
+  { "type": "mc", "question": "في وجهة نظر المقترض، ماذا يمثل قرض مأخوذ بقيمة 5000 دولار عند 6% فائدة؟", "options": ["A) تدفق داخلي", "B) تدفق خارجي", "C) لا تدفق نقدي", "D) تدفق نقدي صافي"], "answer": "A) تدفق داخلي" },
+  { "type": "mc", "question": "كيف يكون مخطط التدفق النقدي مفيداً في التحليل الاقتصادي الهندسي؟", "options": ["A) يظهر ميزانية المشروع", "B) يصور حجم، علامة، وتوقيت التدفقات النقدية", "C) يمثل معالم المشروع", "D) يشير إلى الجدول الزمني للمشروع"], "answer": "B) يصور حجم، علامة، وتوقيت التدفقات النقدية" },
+  { "type": "mc", "question": "في مثال مخطط التدفق النقدي، ما هو التدفق النقدي الخارجي لسداد القرض في نهاية السنة الثانية؟", "options": ["A) -540 دولار", "B) -580 دولار", "C) -1040 دولار", "D) -1080 دولار"], "answer": "A) -540 دولار" },
+  { "type": "mc", "question": "ما الذي يتضمنه عادةً فئة التدفقات الداخلة في مخطط التدفق النقدي؟", "options": ["A) سداد القروض", "B) مدفوعات الفائدة", "C) المبالغ المقترضة", "D) النفقات"], "answer": "C) المبالغ المقترضة" },
+  { "type": "mc", "question": "ما هو التدفق النقدي النهائي في نهاية السنة الثالثة للمقترض الذي يسدد ثلاث دفعات في نهاية السنة عند 10% فائدة؟", "options": ["A) -1000 دولار", "B) -1100 دولار", "C) -1200 دولار", "D) -3000 دولار"], "answer": "B) -1100 دولار" },
+  { "type": "mc", "question": "ما هو الغرض من إنشاء مخطط التدفق النقدي في تحليل المشروع؟", "options": ["A) لتحديد مدة المشروع", "B) لتصور التدفقات النقدية الداخلة والخارجة بمرور الوقت", "C) لتعيين معالم المشروع", "D) لتحديد ميزانية المشروع"], "answer": "B) لتصور التدفقات النقدية الداخلة والخارجة بمرور الوقت" },
+  { "type": "mc", "question": "ما هي التكلفة الإجمالية للصيانة لآلة جز العشب على مدى 3 سنوات في مثال مخطط التدفق النقدي؟", "options": ["A) 300 دولار", "B) 450 دولار", "C) 600 دولار", "D) 900 دولار"], "answer": "B) 450 دولار" },
+  { "type": "mc", "question": "ماذا يعني مصطلح 'التدفق الداخلي' في سياق التدفقات النقدية؟", "options": ["A) نفقة", "B) إيراد", "C) سداد القرض", "D) استثمار"], "answer": "B) إيراد" },
+  { "type": "mc", "question": "ما هو معدل الفائدة على القرض في المثال حيث يسدد الشخص ثلاث دفعات في نهاية السنة؟", "options": ["A) 5%", "B) 7%", "C) 9%", "D) 10%"], "answer": "D) 10%" },
+  { "type": "mc", "question": "ما هو التدفق النقدي في نهاية السنة الأولى في مثال القرض مع رأس المال 1000 دولار وفائدة 8%؟", "options": ["A) -540 دولار", "B) -580 دولار", "C) +540 دولار", "D) +580 دولار"], "answer": "A) -540 دولار" },
+  { "type": "mc", "question": "ما هو التدفق النقدي الصافي في نهاية السنة الثالثة في مثال مخطط التدفق النقدي؟", "options": ["A) +1040 دولار", "B) +1080 دولار", "C) +1100 دولار", "D) +3000 دولار"], "answer": "B) +1080 دولار" },
+  { "type": "mc", "question": "في تحليل التدفقات النقدية، ماذا يعني مصطلح 'التدفق الخارجي'؟", "options": ["A) سداد القرض", "B) نفقة", "C) إيراد", "D) استثمار"], "answer": "B) نفقة" },
+  { "type": "mc", "question": "ما هو الغرض من مقارنة التدفقات النقدية في تحليل الجدوى الاقتصادية؟", "options": ["A) لتحديد ميزانية المشروع", "B) لتصور الجدول الزمني", "C) لاختيار البديل الأكثر فعالية من حيث التكلفة", "D) لتحديد معالم المشروع"], "answer": "C) لاختيار البديل الأكثر فعالية من حيث التكلفة" }
+        ]
+      };
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+        let selectedLanguage = 'en';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+        });
+
+        function updateRangeValues() {
+            const mcRange = document.getElementById('mcCount');
+            mcRange.max = questions[selectedLanguage].filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function startExam() {
+            selectedLanguage = document.getElementById('languageSelect').value;
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const mcQuestions = questions[selectedLanguage].filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return mcQuestions;
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = true;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((q, index) => {
+                if (userAnswers[index] === q.answer) {
+                    score++;
+                    correctAnswers.push(index + 1);
+                }
+            });
+            document.getElementById('resultContainer').innerHTML = `
+                <div class="result">
+                    <h2>Results</h2>
+                    <p>You scored ${score} out of ${selectedQuestions.length}.</p>
+                    <p>Correct answers: ${correctAnswers.join(', ')}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

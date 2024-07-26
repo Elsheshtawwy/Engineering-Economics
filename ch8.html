@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch8</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>ِChapter8 Exam</h1>
+            <label class="slider-label">Select Language:</label>
+            <select id="languageSelect">
+                <option value="en">English</option>
+                <option value="ar">Arabic</option>
+            </select>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>
+           const questions = {
+            "en": [
+        { "type": "mc", "question": "What is the purpose of Present Worth Analysis?", "options": ["A) To compare different alternatives based on their current value", "B) To determine the future value of an investment", "C) To calculate the interest rate for a loan", "D) To assess the annual worth of a project"], "answer": "A) To compare different alternatives based on their current value" },
+        { "type": "mc", "question": "What does Annual Worth Analysis focus on?", "options": ["A) The value of money over time", "B) The value of annual returns from an investment", "C) The interest rate applied to a loan", "D) The total cost of a project"], "answer": "B) The value of annual returns from an investment" },
+        { "type": "mc", "question": "Which analysis method assesses the profitability of an investment by comparing costs and benefits?", "options": ["A) Cost/Benefit Analysis", "B) Rate of Return Analysis", "C) Present Worth Analysis", "D) Annual Worth Analysis"], "answer": "A) Cost/Benefit Analysis" },
+        { "type": "mc", "question": "In Rate of Return Analysis, what is evaluated?", "options": ["A) The total project cost", "B) The time value of money", "C) The return on investment percentage", "D) The salvage value of an asset"], "answer": "C) The return on investment percentage" },
+        { "type": "mc", "question": "Economic equivalence involves comparing amounts of money at different times. What factor is crucial for this?", "options": ["A) Inflation rate", "B) Interest rate", "C) Tax rate", "D) Exchange rate"], "answer": "B) Interest rate" },
+        { "type": "mc", "question": "What does the term 'equivalence' mean in economic analysis?", "options": ["A) Equal amounts of money at the same time", "B) Different amounts of money considered equal in economic value at different times", "C) The value of money at different interest rates", "D) The cost of investments"], "answer": "B) Different amounts of money considered equal in economic value at different times" },
+        { "type": "mc", "question": "How do you judge the relative attractiveness of different alternatives in economic analysis?", "options": ["A) By comparing their total costs", "B) By calculating their equivalent values", "C) By evaluating their interest rates", "D) By assessing their future benefits"], "answer": "B) By calculating their equivalent values" },
+        { "type": "mc", "question": "When using the technique of equivalence, what should be determined for each plan?", "options": ["A) The present worth of future costs", "B) The future value of present benefits", "C) A single equivalent value at a common point in time", "D) The annual worth of each plan"], "answer": "C) A single equivalent value at a common point in time" },
+        { "type": "mc", "question": "What is the main goal of Cost-Benefit Analysis?", "options": ["A) To compare the costs of different projects", "B) To determine the net worth of a project", "C) To weigh the costs against the benefits of a project", "D) To analyze the interest rate of investments"], "answer": "C) To weigh the costs against the benefits of a project" },
+        { "type": "mc", "question": "How does Net Present Value (NPV) relate to investment decisions?", "options": ["A) It indicates the future value of investments", "B) It shows the present value of future benefits minus future costs", "C) It calculates the rate of return on investments", "D) It assesses the annual worth of an investment"], "answer": "B) It shows the present value of future benefits minus future costs" },
+        { "type": "mc", "question": "In the context of Cost-Benefit Analysis, what does a positive Net Present Value (NPV) indicate?", "options": ["A) The investment is not worth pursuing", "B) The benefits outweigh the costs", "C) The costs are higher than the benefits", "D) The project should be avoided"], "answer": "B) The benefits outweigh the costs" },
+        { "type": "mc", "question": "How is the Benefit-Cost Ratio used in project evaluation?", "options": ["A) To determine the interest rate on a project", "B) To compare the future benefits to the future costs", "C) To calculate the annual worth of a project", "D) To assess the salvage value of an investment"], "answer": "B) To compare the future benefits to the future costs" },
+        { "type": "mc", "question": "What does a Benefit-Cost Ratio greater than 1 suggest?", "options": ["A) The project should not be undertaken", "B) The project is not financially viable", "C) The project is worth pursuing", "D) The project has a negative NPV"], "answer": "C) The project is worth pursuing" },
+        { "type": "mc", "question": "In Present Worth Analysis, what does the formula P = A[(1+i)^n − 1] / [i(1+i)^n] calculate?", "options": ["A) The future value of an investment", "B) The present worth of an annual series of payments", "C) The total project cost", "D) The interest rate"], "answer": "B) The present worth of an annual series of payments" },
+        { "type": "mc", "question": "When evaluating two plans with a 1% interest rate, what should be done to compare them?", "options": ["A) Calculate the future value of each plan", "B) Convert the cash flows of each plan to their present values", "C) Determine the interest rate for each plan", "D) Assess the annual worth of each plan"], "answer": "B) Convert the cash flows of each plan to their present values" },
+        { "type": "mc", "question": "What is the present worth of a future amount of $1,000 at an interest rate of 6% over 5 years?", "options": ["A) $744", "B) $747", "C) $747.50", "D) $790"], "answer": "B) $747" },
+        { "type": "mc", "question": "What should be done if the Benefit-Cost Ratio is less than 1?", "options": ["A) Proceed with the project", "B) Recalculate the Net Present Value", "C) Do not undertake the project", "D) Increase the interest rate"], "answer": "C) Do not undertake the project" },
+        { "type": "mc", "question": "In the example provided, what was the Net Present Value of purchasing a new dump truck with a cost of $50,000 and an annual income of $9,000?", "options": ["A) $2,000", "B) -$849", "C) $849", "D) $1,000"], "answer": "B) -$849" },
+        { "type": "mc", "question": "To calculate the present worth of future benefits of $9,000 annually for 10 years at an interest rate of 9%, what is used?", "options": ["A) The compounding factor for a single amount", "B) The compounding factor for a series of payments", "C) The Net Present Value formula", "D) The Benefit-Cost Ratio formula"], "answer": "B) The compounding factor for a series of payments" },
+        { "type": "mc", "question": "What does the Present Value Factor represent in economic analysis?", "options": ["A) The interest rate applied to a loan", "B) The discount factor used to convert future values to present values", "C) The future value of an investment", "D) The total project cost"], "answer": "B) The discount factor used to convert future values to present values" },
+        { "type": "mc", "question": "When comparing two alternatives using equivalence, what must be the same for both alternatives?", "options": ["A) The future value", "B) The interest rate and the time point", "C) The annual worth", "D) The total cost"], "answer": "B) The interest rate and the time point" },
+        { "type": "mc", "question": "What is the Benefit-Cost Ratio formula?", "options": ["A) NPV = ∑ Present Value of Future Benefits – ∑ Present Value of Future Costs", "B) Benefit-Cost Ratio = ∑ Present Value of Future Benefits / ∑ Present Value of Future Costs", "C) P = A[(1+i)^n − 1] / [i(1+i)^n]", "D) P = Future Value / (1+i)^n"], "answer": "B) Benefit-Cost Ratio = ∑ Present Value of Future Benefits / ∑ Present Value of Future Costs" },
+        { "type": "mc", "question": "What should be done if the Net Present Value is negative?", "options": ["A) Proceed with the project", "B) Recalculate the Benefit-Cost Ratio", "C) Avoid the investment", "D) Increase the annual income"], "answer": "C) Avoid the investment" },
+        { "type": "mc", "question": "In Cost-Benefit Analysis, which of the following is NOT considered?", "options": ["A) Initial investment costs", "B) Annual maintenance costs", "C) Future resale value", "D) Personal preferences"], "answer": "D) Personal preferences" },
+        { "type": "mc", "question": "How is the future value of an investment calculated?", "options": ["A) By discounting future cash flows", "B) By calculating the present worth of future cash flows", "C) By compounding the present value at the interest rate", "D) By summing the annual worth"], "answer": "C) By compounding the present value at the interest rate" },
+        { "type": "mc", "question": "Which method is used to evaluate an investment's performance over its lifespan?", "options": ["A) Present Worth Analysis", "B) Future Value Analysis", "C) Net Present Value Analysis", "D) Rate of Return Analysis"], "answer": "D) Rate of Return Analysis" },
+        { "type": "mc", "question": "To find the future value of a $500 investment at an annual interest rate of 5% over 10 years, which formula is used?", "options": ["A) Future Value = Present Value × (1 + i)^n", "B) Future Value = Present Value / (1 + i)^n", "C) Present Value = Future Value × (1 + i)^n", "D) Present Value = Future Value / (1 + i)^n"], "answer": "A) Future Value = Present Value × (1 + i)^n" },
+        { "type": "mc", "question": "What is the main purpose of using Rate of Return in investment analysis?", "options": ["A) To determine the amount of interest paid", "B) To assess the annual worth of a project", "C) To calculate the profitability of an investment", "D) To compare different investment options"], "answer": "C) To calculate the profitability of an investment" },
+        { "type": "mc", "question": "How do you calculate the Net Present Value of an investment?", "options": ["A) Subtract the total present value of costs from the total present value of benefits", "B) Add the future value of benefits to the present value of costs", "C) Calculate the total annual worth of the investment", "D) Determine the interest rate applied"], "answer": "A) Subtract the total present value of costs from the total present value of benefits" },
+        { "type": "mc", "question": "Which analysis method is best for comparing multiple investment options with different time spans?", "options": ["A) Net Present Value Analysis", "B) Annual Worth Analysis", "C) Benefit-Cost Ratio", "D) Cost-Benefit Analysis"], "answer": "B) Annual Worth Analysis" },
+        { "type": "mc", "question": "If the Net Present Value of an investment is positive, what does it indicate?", "options": ["A) The investment should be avoided", "B) The benefits are less than the costs", "C) The project is financially viable", "D) The annual returns are negative"], "answer": "C) The project is financially viable" },
+        { "type": "mc", "question": "In Present Worth Analysis, what does the variable 'i' represent?", "options": ["A) The interest rate", "B) The investment amount", "C) The number of years", "D) The annual income"], "answer": "A) The interest rate" },
+        { "type": "mc", "question": "Which formula is used to convert future value to present value?", "options": ["A) P = Future Value / (1 + i)^n", "B) P = Future Value × (1 + i)^n", "C) P = A[(1 + i)^n − 1] / [i(1 + i)^n]", "D) P = Future Value × i / (1 + i)^n"], "answer": "A) P = Future Value / (1 + i)^n" },
+        { "type": "mc", "question": "To evaluate a project with irregular cash flows, which method should be used?", "options": ["A) Annual Worth Analysis", "B) Present Worth Analysis", "C) Future Value Analysis", "D) Rate of Return Analysis"], "answer": "B) Present Worth Analysis" },
+        { "type": "mc", "question": "How is the future value of an annuity calculated?", "options": ["A) By compounding the annuity payments at the interest rate", "B) By summing the present value of each payment", "C) By discounting each annuity payment to the present value", "D) By calculating the total annual worth"], "answer": "A) By compounding the annuity payments at the interest rate" },
+        { "type": "mc", "question": "In economic analysis, what is the significance of a high Benefit-Cost Ratio?", "options": ["A) It indicates a less attractive investment", "B) It shows the investment has low returns", "C) It suggests the project is more beneficial compared to its costs", "D) It implies the project has high costs"], "answer": "C) It suggests the project is more beneficial compared to its costs" },
+        { "type": "mc", "question": "What does a Rate of Return analysis measure?", "options": ["A) The total cost of a project", "B) The annual income from an investment", "C) The percentage of return on investment", "D) The future value of an investment"], "answer": "C) The percentage of return on investment" },
+        { "type": "mc", "question": "To determine the equivalent annual worth of a project, which method is used?", "options": ["A) Net Present Value Analysis", "B) Annual Worth Analysis", "C) Cost-Benefit Analysis", "D) Rate of Return Analysis"], "answer": "B) Annual Worth Analysis" },
+        { "type": "mc", "question": "What is the primary focus of Net Present Value (NPV) in project evaluation?", "options": ["A) To calculate the total project cost", "B) To find the present value of future cash flows", "C) To compare the annual returns", "D) To determine the interest rate"], "answer": "B) To find the present value of future cash flows" },
+        { "type": "mc", "question": "How do you compare two projects with different durations using economic analysis?", "options": ["A) By calculating their Net Present Values", "B) By summing their annual worth", "C) By analyzing their Benefit-Cost Ratios", "D) By converting their cash flows to a common time point"], "answer": "D) By converting their cash flows to a common time point" },
+        { "type": "mc", "question": "In the context of economic analysis, what is the main purpose of calculating Present Worth?", "options": ["A) To find the future value of a project", "B) To determine the cost of an investment", "C) To assess the current value of future cash flows", "D) To compare annual returns"], "answer": "C) To assess the current value of future cash flows" },
+        { "type": "mc", "question": "What should be done if an investment's Benefit-Cost Ratio is exactly 1?", "options": ["A) The project should be avoided", "B) The investment is considered marginally acceptable", "C) The investment is highly recommended", "D) Recalculate the Net Present Value"], "answer": "B) The investment is considered marginally acceptable" },
+        { "type": "mc", "question": "In Cost-Benefit Analysis, what does a Benefit-Cost Ratio of less than 1 imply?", "options": ["A) The project is highly profitable", "B) The costs outweigh the benefits", "C) The project has a positive NPV", "D) The project should be considered"], "answer": "B) The costs outweigh the benefits" },
+        { "type": "mc", "question": "Which method is best for evaluating projects with varying cash flow patterns?", "options": ["A) Rate of Return Analysis", "B) Annual Worth Analysis", "C) Net Present Value Analysis", "D) Future Value Analysis"], "answer": "C) Net Present Value Analysis" },
+        { "type": "mc", "question": "To determine the present value of an annuity with annual payments, which formula is used?", "options": ["A) P = A × [(1+i)^n − 1] / [i(1+i)^n]", "B) P = A / (1+i)^n", "C) P = A × i / (1+i)^n", "D) P = A × (1+i)^n"], "answer": "A) P = A × [(1+i)^n − 1] / [i(1+i)^n]" },
+        { "type": "mc", "question": "What factor is used to convert future cash flows into present value?", "options": ["A) The interest rate", "B) The discount factor", "C) The annuity factor", "D) The future value factor"], "answer": "B) The discount factor" },
+        { "type": "mc", "question": "How is the annual worth of an investment determined?", "options": ["A) By calculating the Net Present Value", "B) By finding the equivalent annual amount from the present value", "C) By summing the future value of each cash flow", "D) By calculating the total cost over the investment period"], "answer": "B) By finding the equivalent annual amount from the present value" },
+        { "type": "mc", "question": "Which of the following is an advantage of using Net Present Value (NPV) for investment analysis?", "options": ["A) It considers the time value of money", "B) It does not account for the initial investment", "C) It is simple to calculate", "D) It ignores future cash flows"], "answer": "A) It considers the time value of money" },
+        { "type": "mc", "question": "In Cost-Benefit Analysis, what should be considered when assessing project feasibility?", "options": ["A) Only the initial costs", "B) Only the future benefits", "C) Both costs and benefits over the project life", "D) The personal preferences of stakeholders"], "answer": "C) Both costs and benefits over the project life" },
+        { "type": "mc", "question": "What does a high Net Present Value indicate about an investment?", "options": ["A) The investment should be avoided", "B) The investment is highly profitable", "C) The project has low returns", "D) The costs exceed the benefits"], "answer": "B) The investment is highly profitable" },
+        { "type": "mc", "question": "Which formula is used to find the annual worth of an investment?", "options": ["A) AW = PV × [i(1+i)^n] / [(1+i)^n − 1]", "B) AW = PV / [(1+i)^n − 1]", "C) AW = PV × (1+i)^n", "D) AW = PV / (1 + i)^n"], "answer": "A) AW = PV × [i(1+i)^n] / [(1+i)^n − 1]" },
+        { "type": "mc", "question": "How is the Benefit-Cost Ratio calculated?", "options": ["A) By dividing total benefits by total costs", "B) By subtracting costs from benefits", "C) By dividing costs by benefits", "D) By adding the costs and benefits"], "answer": "A) By dividing total benefits by total costs" },
+        { "type": "mc", "question": "In a Cost-Benefit Analysis, what does a Benefit-Cost Ratio greater than 1 signify?", "options": ["A) The project is not feasible", "B) The benefits are less than the costs", "C) The project has high returns relative to its costs", "D) The project has low returns"], "answer": "C) The project has high returns relative to its costs" },
+        { "type": "mc", "question": "To evaluate a project with uncertain future cash flows, which analysis is appropriate?", "options": ["A) Sensitivity Analysis", "B) Rate of Return Analysis", "C) Net Present Value Analysis", "D) Benefit-Cost Ratio Analysis"], "answer": "A) Sensitivity Analysis" },
+        { "type": "mc", "question": "Which term refers to the value of money at a specific point in the future?", "options": ["A) Present Value", "B) Future Value", "C) Net Present Value", "D) Annual Worth"], "answer": "B) Future Value" },
+        { "type": "mc", "question": "How do you assess the impact of inflation on investment returns?", "options": ["A) By calculating the real rate of return", "B) By ignoring inflation in analysis", "C) By increasing the nominal rate of return", "D) By decreasing the investment amount"], "answer": "A) By calculating the real rate of return" },
+        { "type": "mc", "question": "What is the main goal of Sensitivity Analysis?", "options": ["A) To determine the investment's Net Present Value", "B) To assess the effect of changes in key variables on project outcomes", "C) To calculate the future value of investments", "D) To compare different investment options"], "answer": "B) To assess the effect of changes in key variables on project outcomes" },
+        { "type": "mc", "question": "When performing a Cost-Benefit Analysis, which of the following factors is NOT typically included?", "options": ["A) Initial project costs", "B) Future operating costs", "C) Long-term benefits", "D) Personal opinions of stakeholders"], "answer": "D) Personal opinions of stakeholders" }
+    ],
+  "ar": [
+    { "type": "mc", "question": "ما هو هدف تحليل القيمة الحالية؟", "options": ["A) مقارنة البدائل المختلفة بناءً على قيمتها الحالية", "B) تحديد القيمة المستقبلية للاستثمار", "C) حساب معدل الفائدة لقرض", "D) تقييم القيمة السنوية لمشروع"], "answer": "A) مقارنة البدائل المختلفة بناءً على قيمتها الحالية" },
+    { "type": "mc", "question": "ما الذي يركز عليه تحليل القيمة السنوية؟", "options": ["A) قيمة المال بمرور الوقت", "B) قيمة العائدات السنوية من الاستثمار", "C) معدل الفائدة المطبق على قرض", "D) التكلفة الإجمالية لمشروع"], "answer": "B) قيمة العائدات السنوية من الاستثمار" },
+    { "type": "mc", "question": "أي طريقة تحليلية تقييم ربحية الاستثمار من خلال مقارنة التكاليف والفوائد؟", "options": ["A) تحليل التكلفة / الفائدة", "B) تحليل معدل العائد", "C) تحليل القيمة الحالية", "D) تحليل القيمة السنوية"], "answer": "A) تحليل التكلفة / الفائدة" },
+    { "type": "mc", "question": "في تحليل معدل العائد، ماذا يتم تقييمه؟", "options": ["A) التكلفة الإجمالية للمشروع", "B) قيمة الوقت للمال", "C) نسبة العائد على الاستثمار", "D) قيمة الخردة للأصل"], "answer": "C) نسبة العائد على الاستثمار" },
+    { "type": "mc", "question": "ما هو العامل الأساسي في تحقيق التوازن الاقتصادي عند مقارنة مبالغ المال في أوقات مختلفة؟", "options": ["A) معدل التضخم", "B) معدل الفائدة", "C) معدل الضريبة", "D) معدل الصرف"], "answer": "B) معدل الفائدة" },
+    { "type": "mc", "question": "ماذا يعني مصطلح 'التوازن' في التحليل الاقتصادي؟", "options": ["A) مبالغ المال المتساوية في نفس الوقت", "B) مبالغ المال المختلفة تعتبر متساوية في القيمة الاقتصادية في أوقات مختلفة", "C) قيمة المال بمعدلات فائدة مختلفة", "D) تكلفة الاستثمارات"], "answer": "B) مبالغ المال المختلفة تعتبر متساوية في القيمة الاقتصادية في أوقات مختلفة" },
+    { "type": "mc", "question": "كيف تقوم بالحكم على جاذبية البدائل المختلفة في التحليل الاقتصادي؟", "options": ["A) بمقارنة تكاليفها الإجمالية", "B) بحساب قيمتها المعادلة", "C) بتقييم معدلات الفائدة الخاصة بها", "D) بتقييم فوائدها المستقبلية"], "answer": "B) بحساب قيمتها المعادلة" },
+    { "type": "mc", "question": "عند استخدام تقنية التوازن، ماذا يجب تحديده لكل خطة؟", "options": ["A) القيمة الحالية للتكاليف المستقبلية", "B) القيمة المستقبلية للفوائد الحالية", "C) قيمة معادلة واحدة في نقطة زمنية مشتركة", "D) القيمة السنوية لكل خطة"], "answer": "C) قيمة معادلة واحدة في نقطة زمنية مشتركة" },
+    { "type": "mc", "question": "ما هو الهدف الرئيسي لتحليل التكلفة / الفائدة؟", "options": ["A) مقارنة تكاليف المشاريع المختلفة", "B) تحديد القيمة الصافية لمشروع", "C) مقارنة التكاليف مع الفوائد لمشروع", "D) تحليل معدل الفائدة للاستثمارات"], "answer": "C) مقارنة التكاليف مع الفوائد لمشروع" },
+    { "type": "mc", "question": "كيف يرتبط صافي القيمة الحالية (NPV) بقرارات الاستثمار؟", "options": ["A) يشير إلى القيمة المستقبلية للاستثمارات", "B) يظهر القيمة الحالية للفوائد المستقبلية مطروحًا منها التكاليف المستقبلية", "C) يحسب معدل العائد على الاستثمارات", "D) يقيم القيمة السنوية للاستثمار"], "answer": "B) يظهر القيمة الحالية للفوائد المستقبلية مطروحًا منها التكاليف المستقبلية" },
+    { "type": "mc", "question": "في سياق تحليل التكلفة / الفائدة، ماذا يشير صافي القيمة الحالية (NPV) الإيجابي؟", "options": ["A) الاستثمار غير جدير بالمتابعة", "B) الفوائد تفوق التكاليف", "C) التكاليف أعلى من الفوائد", "D) يجب تجنب المشروع"], "answer": "B) الفوائد تفوق التكاليف" },
+    { "type": "mc", "question": "كيف يتم استخدام نسبة الفائدة / التكلفة في تقييم المشاريع؟", "options": ["A) لتحديد معدل الفائدة على المشروع", "B) لمقارنة الفوائد المستقبلية بالتكاليف المستقبلية", "C) لحساب القيمة السنوية لمشروع", "D) لتقييم قيمة الخردة للاستثمار"], "answer": "B) لمقارنة الفوائد المستقبلية بالتكاليف المستقبلية" },
+    { "type": "mc", "question": "ماذا تقترح نسبة الفائدة / التكلفة التي تزيد عن 1؟", "options": ["A) يجب عدم تنفيذ المشروع", "B) المشروع ليس مجديًا من الناحية المالية", "C) المشروع يستحق المتابعة", "D) المشروع له صافي قيمة حالية سلبية"], "answer": "C) المشروع يستحق المتابعة" },
+    { "type": "mc", "question": "في تحليل القيمة الحالية، ماذا يحسب الصيغة P = A[(1+i)^n − 1] / [i(1+i)^n]؟", "options": ["A) القيمة المستقبلية للاستثمار", "B) القيمة الحالية لسلسلة سنوية من المدفوعات", "C) التكلفة الإجمالية للمشروع", "D) معدل الفائدة"], "answer": "B) القيمة الحالية لسلسلة سنوية من المدفوعات" },
+    { "type": "mc", "question": "عند تقييم خطتين بمعدل فائدة 1%، ماذا يجب القيام به لمقارنتهما؟", "options": ["A) حساب القيمة المستقبلية لكل خطة", "B) تحويل التدفقات النقدية لكل خطة إلى قيمتها الحالية", "C) تحديد معدل الفائدة لكل خطة", "D) تقييم القيمة السنوية لكل خطة"], "answer": "B) تحويل التدفقات النقدية لكل خطة إلى قيمتها الحالية" },
+    { "type": "mc", "question": "ما هي القيمة الحالية لمبلغ مستقبلي قدره 1,000 دولار بمعدل فائدة 6% على مدى 5 سنوات؟", "options": ["A) 744 دولار", "B) 747 دولار", "C) 747.50 دولار", "D) 790 دولار"], "answer": "B) 747 دولار" },
+    { "type": "mc", "question": "ماذا يجب فعله إذا كانت نسبة الفائدة / التكلفة أقل من 1؟", "options": ["A) متابعة المشروع", "B) إعادة حساب صافي القيمة الحالية", "C) عدم تنفيذ المشروع", "D) زيادة معدل الفائدة"], "answer": "C) عدم تنفيذ المشروع" },
+    { "type": "mc", "question": "في المثال المقدم، ما كانت صافي القيمة الحالية لشراء شاحنة تفريغ جديدة بتكلفة 50,000 دولار ودخل سنوي قدره 9,000 دولار؟", "options": ["A) 2,000 دولار", "B) -849 دولار", "C) 849 دولار", "D) 1,000 دولار"], "answer": "B) -849 دولار" },
+    { "type": "mc", "question": "لحساب القيمة الحالية للفوائد المستقبلية قدرها 9,000 دولار سنويًا لمدة 10 سنوات بمعدل فائدة 9%، ماذا يستخدم؟", "options": ["A) عامل التراكم لمبلغ واحد", "B) عامل التراكم لسلسلة من المدفوعات", "C) صيغة صافي القيمة الحالية", "D) صيغة نسبة الفائدة / التكلفة"], "answer": "B) عامل التراكم لسلسلة من المدفوعات" },
+    { "type": "mc", "question": "ماذا يمثل عامل القيمة الحالية في التحليل الاقتصادي؟", "options": ["A) معدل الفائدة المطبق على قرض", "B) عامل الخصم المستخدم لتحويل القيم المستقبلية إلى قيم حالية", "C) القيمة المستقبلية للاستثمار", "D) التكلفة الإجمالية للمشروع"], "answer": "B) عامل الخصم المستخدم لتحويل القيم المستقبلية إلى قيم حالية" },
+    { "type": "mc", "question": "عند مقارنة بديلين باستخدام التوازن، ماذا يجب أن يكون متماثلاً لكلا البديلين؟", "options": ["A) القيمة المستقبلية", "B) معدل الفائدة ونقطة الزمن", "C) القيمة السنوية", "D) التكلفة الإجمالية"], "answer": "B) معدل الفائدة ونقطة الزمن" },
+    { "type": "mc", "question": "ما هي صيغة نسبة الفائدة / التكلفة؟", "options": ["A) NPV = ∑ القيمة الحالية للفوائد المستقبلية - ∑ القيمة الحالية للتكاليف المستقبلية", "B) نسبة الفائدة / التكلفة = ∑ القيمة الحالية للفوائد المستقبلية / ∑ القيمة الحالية للتكاليف المستقبلية", "C) قيمة الاستثمار = القيمة المستقبلية - القيمة الحالية", "D) معدل الفائدة = (قيمة الاستثمار - التكلفة) / التكلفة"], "answer": "B) نسبة الفائدة / التكلفة = ∑ القيمة الحالية للفوائد المستقبلية / ∑ القيمة الحالية للتكاليف المستقبلية" },
+    { "type": "mc", "question": "في حالة وجود صافي قيمة حالية إيجابي، ماذا يعني ذلك عن المشروع؟", "options": ["A) المشروع غير مجدي ماليًا", "B) المشروع يجلب عوائد أقل من التكاليف", "C) المشروع جدير بالاستثمار", "D) المشروع له قيمة خالصة منخفضة"], "answer": "C) المشروع جدير بالاستثمار" },
+    { "type": "mc", "question": "ما الذي يتم تحديده بواسطة نسبة الفائدة / التكلفة؟", "options": ["A) مدى ربحية المشروع مقارنة بتكاليفه", "B) القيمة المستقبلية للاستثمار", "C) تكلفة القرض", "D) معدل العائد على الاستثمار"], "answer": "A) مدى ربحية المشروع مقارنة بتكاليفه" },
+    { "type": "mc", "question": "في تحليل القيمة الحالية، ماذا تعني القيمة الحالية للأصل؟", "options": ["A) القيمة المستقبلية للأصل بتقدير معدل الفائدة", "B) القيمة التي كان سيحصل عليها الأصل إذا تم بيعه اليوم", "C) القيمة الحالية لتدفقات الأموال الناتجة عن الأصل", "D) التكلفة الإجمالية للاستثمار في الأصل"], "answer": "C) القيمة الحالية لتدفقات الأموال الناتجة عن الأصل" },
+    { "type": "mc", "question": "ماذا يشير تحليل القيمة السنوية إلى المستثمر؟", "options": ["A) القيمة المستقبلية للاستثمار", "B) التكلفة الإجمالية للمشروع", "C) القيمة المتساوية للاستثمار في فترة زمنية محددة", "D) معدل العائد على الاستثمار"], "answer": "C) القيمة المتساوية للاستثمار في فترة زمنية محددة" },
+    { "type": "mc", "question": "عند استخدام تحليل التكلفة / الفائدة، ماذا يتم تحديده؟", "options": ["A) معدل الفائدة للاستثمار", "B) مدى ربحية المشروع بناءً على تكاليفه وفوائده", "C) صافي القيمة الحالية للمشروع", "D) القيمة المستقبلية للتكاليف"], "answer": "B) مدى ربحية المشروع بناءً على تكاليفه وفوائده" }
+]  
+      };
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+        let selectedLanguage = 'en';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+        });
+
+        function updateRangeValues() {
+            const mcRange = document.getElementById('mcCount');
+            mcRange.max = questions[selectedLanguage].filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function startExam() {
+            selectedLanguage = document.getElementById('languageSelect').value;
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const mcQuestions = questions[selectedLanguage].filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return mcQuestions;
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = true;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((q, index) => {
+                if (userAnswers[index] === q.answer) {
+                    score++;
+                    correctAnswers.push(index + 1);
+                }
+            });
+            document.getElementById('resultContainer').innerHTML = `
+                <div class="result">
+                    <h2>Results</h2>
+                    <p>You scored ${score} out of ${selectedQuestions.length}.</p>
+                    <p>Correct answers: ${correctAnswers.join(', ')}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

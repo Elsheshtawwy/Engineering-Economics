@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch10</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>ِChapter10 Exam</h1>
+            <label class="slider-label">Select Language:</label>
+            <select id="languageSelect">
+                <option value="en">English</option>
+                <option value="ar">Arabic</option>
+            </select>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>
+           const questions = {
+            "en": [
+    { "type": "mc", "question": "Which of the following methods for calculating depreciation accounts for the usage of the asset over time?", "options": ["A) Straight-Line Method", "B) Double Declining Balance Method", "C) Sum-of-the-Years-Digits Method", "D) Units of Production Method"], "answer": "D) Units of Production Method" },
+    { "type": "mc", "question": "If an asset costs $50,000 and has a salvage value of $5,000 with a useful life of 10 years, what is the annual depreciation using the Straight-Line Method?", "options": ["A) $4,500", "B) $5,000", "C) $4,000", "D) $4,800"], "answer": "C) $4,500" },
+    { "type": "mc", "question": "What is the formula for calculating depreciation expense using the Double Declining Balance Method?", "options": ["A) (Cost - Salvage Value) / Useful Life", "B) 2 * (1 / Useful Life) * Book Value", "C) Cost / Useful Life", "D) (Cost - Salvage Value) / 2"], "answer": "B) 2 * (1 / Useful Life) * Book Value" },
+    { "type": "mc", "question": "How does inflation impact the depreciation expense calculation?", "options": ["A) It increases the depreciation expense", "B) It decreases the depreciation expense", "C) It does not impact the depreciation expense", "D) It changes the asset's useful life"], "answer": "C) It does not impact the depreciation expense" },
+    { "type": "mc", "question": "Which depreciation method accelerates the expense recognition in the earlier years of an asset's life?", "options": ["A) Straight-Line Method", "B) Units of Production Method", "C) Sum-of-the-Years-Digits Method", "D) Double Declining Balance Method"], "answer": "D) Double Declining Balance Method" },
+    { "type": "mc", "question": "What is the purpose of calculating the salvage value of an asset?", "options": ["A) To estimate the future resale value", "B) To determine the total depreciation expense", "C) To calculate the annual depreciation", "D) To adjust for inflation"], "answer": "A) To estimate the future resale value" },
+    { "type": "mc", "question": "In the context of depreciation, what does 'book value' refer to?", "options": ["A) The market value of the asset", "B) The initial cost of the asset", "C) The cost of the asset minus accumulated depreciation", "D) The asset's salvage value"], "answer": "C) The cost of the asset minus accumulated depreciation" },
+    { "type": "mc", "question": "How does the Sum-of-the-Years-Digits Method calculate the depreciation expense?", "options": ["A) By applying a fixed percentage to the asset's book value", "B) By allocating more expense in earlier years based on the asset's remaining life", "C) By multiplying the asset's cost by a factor based on the number of years", "D) By dividing the asset's cost by its useful life"], "answer": "B) By allocating more expense in earlier years based on the asset's remaining life" },
+    { "type": "mc", "question": "What is the effect of changing the useful life estimate on the Straight-Line Depreciation calculation?", "options": ["A) It affects the total depreciation expense but not the annual expense", "B) It changes the total depreciation expense but not the book value", "C) It alters the annual depreciation expense but not the total expense", "D) It affects both the annual and total depreciation expenses"], "answer": "C) It alters the annual depreciation expense but not the total expense" },
+    { "type": "mc", "question": "If an asset is sold before the end of its useful life, how is the gain or loss on sale calculated?", "options": ["A) Sale Price - Book Value", "B) Sale Price - Cost", "C) Book Value - Salvage Value", "D) Cost - Salvage Value"], "answer": "A) Sale Price - Book Value" },
+    { "type": "mc", "question": "Which method of depreciation is most commonly used for tax reporting purposes?", "options": ["A) Sum-of-the-Years-Digits Method", "B) Units of Production Method", "C) Double Declining Balance Method", "D) Straight-Line Method"], "answer": "C) Double Declining Balance Method" },
+    { "type": "mc", "question": "What does the term 'accelerated depreciation' mean?", "options": ["A) Depreciation calculated using the Straight-Line Method", "B) Depreciation that increases as the asset ages", "C) Depreciation that is higher in the earlier years of the asset's life", "D) Depreciation that remains constant throughout the asset's life"], "answer": "C) Depreciation that is higher in the earlier years of the asset's life" },
+    { "type": "mc", "question": "In which scenario would the Units of Production Method be most appropriate?", "options": ["A) For an asset with a consistent usage rate", "B) For an asset with varying usage rates over its life", "C) For an asset with no salvage value", "D) For an asset with a fixed useful life"], "answer": "B) For an asset with varying usage rates over its life" },
+    { "type": "mc", "question": "How does a change in salvage value affect the calculation of depreciation expense?", "options": ["A) It changes the total depreciation expense but not the annual expense", "B) It alters both the annual and total depreciation expenses", "C) It only affects the total depreciation expense", "D) It only affects the annual depreciation expense"], "answer": "B) It alters both the annual and total depreciation expenses" },
+    { "type": "mc", "question": "What is the impact of adding additional costs to an asset's cost base on depreciation?", "options": ["A) It decreases the annual depreciation expense", "B) It increases the total depreciation expense", "C) It does not affect the depreciation calculation", "D) It changes the asset's salvage value"], "answer": "B) It increases the total depreciation expense" },
+    { "type": "mc", "question": "If an asset has a residual value of $10,000, a cost of $50,000, and a useful life of 10 years, what is the depreciation expense using the Straight-Line Method?", "options": ["A) $4,000", "B) $5,000", "C) $4,500", "D) $6,000"], "answer": "A) $4,000" },
+    { "type": "mc", "question": "Which method of depreciation will result in the highest expense in the first year of an asset's life?", "options": ["A) Units of Production Method", "B) Straight-Line Method", "C) Double Declining Balance Method", "D) Sum-of-the-Years-Digits Method"], "answer": "C) Double Declining Balance Method" },
+    { "type": "mc", "question": "What is the main disadvantage of the Double Declining Balance Method?", "options": ["A) It provides a constant annual depreciation expense", "B) It results in higher depreciation expenses in the later years", "C) It does not account for the asset's usage", "D) It results in declining depreciation expenses over time"], "answer": "D) It results in declining depreciation expenses over time" },
+    { "type": "mc", "question": "In a situation where an asset's actual usage is different from the estimated usage, which method of depreciation would be most accurate?", "options": ["A) Double Declining Balance Method", "B) Straight-Line Method", "C) Units of Production Method", "D) Sum-of-the-Years-Digits Method"], "answer": "C) Units of Production Method" },
+    { "type": "mc", "question": "Which of the following is not a factor in the calculation of depreciation?", "options": ["A) Initial cost of the asset", "B) Salvage value", "C) Estimated useful life", "D) Market value of the asset"], "answer": "D) Market value of the asset" },
+    { "type": "mc", "question": "When should a company review and adjust its depreciation estimates?", "options": ["A) Annually", "B) At the end of each fiscal year", "C) When the asset's usage or residual value changes significantly", "D) Every 5 years"], "answer": "C) When the asset's usage or residual value changes significantly" },
+    { "type": "mc", "question": "What does the term 'depreciation expense' represent on a company's financial statements?", "options": ["A) The amount of money spent on maintaining the asset", "B) The reduction in the asset's value due to usage and aging", "C) The original cost of the asset", "D) The amount saved for replacing the asset"], "answer": "B) The reduction in the asset's value due to usage and aging" },
+    { "type": "mc", "question": "If an asset is fully depreciated but still in use, how is it reported on the financial statements?", "options": ["A) It is reported at its salvage value", "B) It is reported at its original cost", "C) It is reported at zero value", "D) It is not reported on the financial statements"], "answer": "C) It is reported at zero value" },
+    { "type": "mc", "question": "How does the depreciation method chosen impact the financial ratios of a company?", "options": ["A) It does not impact financial ratios", "B) It can affect profitability ratios and asset turnover ratios", "C) It primarily affects liquidity ratios", "D) It only affects the company's tax liability"], "answer": "B) It can affect profitability ratios and asset turnover ratios" },
+    { "type": "mc", "question": "Which depreciation method requires recalculating the expense each year based on the asset's remaining book value?", "options": ["A) Straight-Line Method", "B) Double Declining Balance Method", "C) Units of Production Method", "D) Sum-of-the-Years-Digits Method"], "answer": "B) Double Declining Balance Method" },
+    { "type": "mc", "question": "What happens to the depreciation expense when an asset's useful life is extended?", "options": ["A) It decreases", "B) It increases", "C) It remains the same", "D) It becomes irrelevant"], "answer": "A) It decreases" },
+    { "type": "mc", "question": "How do accounting standards generally require the treatment of asset impairment?", "options": ["A) As a decrease in depreciation expense", "B) As an adjustment to the asset's book value", "C) As a reduction in the asset's cost", "D) As an increase in the asset's salvage value"], "answer": "B) As an adjustment to the asset's book value" },
+    { "type": "mc", "question": "In financial reporting, how is the cost of maintaining an asset typically recorded?", "options": ["A) As depreciation expense", "B) As an operating expense", "C) As a capital expenditure", "D) As a direct reduction to revenue"], "answer": "B) As an operating expense" },
+    { "type": "mc", "question": "What is the main objective of depreciation for financial reporting?", "options": ["A) To match expenses with revenues", "B) To calculate the net present value of an asset", "C) To determine the asset's market value", "D) To reduce taxable income"], "answer": "A) To match expenses with revenues" },
+    { "type": "mc", "question": "Which method of depreciation is based on the assumption that an asset's economic usefulness declines over time?", "options": ["A) Straight-Line Method", "B) Units of Production Method", "C) Double Declining Balance Method", "D) Sum-of-the-Years-Digits Method"], "answer": "C) Double Declining Balance Method" },
+    { "type": "mc", "question": "If an asset's book value is $15,000 and its salvage value is $3,000 with a useful life of 5 years, what is the annual depreciation using the Sum-of-the-Years-Digits Method?", "options": ["A) $2,400", "B) $3,000", "C) $2,800", "D) $4,000"], "answer": "C) $2,800" },
+    { "type": "mc", "question": "How do changes in the estimated residual value affect the Double Declining Balance Method?", "options": ["A) They do not affect the method", "B) They change the annual depreciation expense", "C) They alter the total depreciation expense", "D) They modify the calculation of the depreciation factor"], "answer": "A) They do not affect the method" },
+    { "type": "mc", "question": "What is a key disadvantage of using the Units of Production Method?", "options": ["A) It is difficult to estimate the total production", "B) It does not reflect changes in usage patterns", "C) It results in higher depreciation in later years", "D) It requires more complex calculations"], "answer": "A) It is difficult to estimate the total production" },
+    { "type": "mc", "question": "What is the impact of applying a higher salvage value on the Straight-Line Method?", "options": ["A) It increases the annual depreciation expense", "B) It decreases the total depreciation expense", "C) It has no impact on the total depreciation expense", "D) It increases the asset's book value"], "answer": "B) It decreases the total depreciation expense" },
+    { "type": "mc", "question": "What is the effect of extending the useful life of an asset on the Double Declining Balance Method?", "options": ["A) It decreases the annual depreciation expense", "B) It increases the total depreciation expense", "C) It has no impact on the annual depreciation expense", "D) It decreases the salvage value"], "answer": "A) It decreases the annual depreciation expense" },
+    { "type": "mc", "question": "If an asset is sold for $12,000 when its book value is $10,000, what is the gain or loss on the sale?", "options": ["A) Gain of $2,000", "B) Loss of $2,000", "C) No gain or loss", "D) Gain of $1,000"], "answer": "A) Gain of $2,000" },
+    { "type": "mc", "question": "Which method is preferred for financial statements when an asset is used evenly throughout its life?", "options": ["A) Double Declining Balance Method", "B) Units of Production Method", "C) Straight-Line Method", "D) Sum-of-the-Years-Digits Method"], "answer": "C) Straight-Line Method" },
+    { "type": "mc", "question": "When calculating depreciation, what does the term 'useful life' refer to?", "options": ["A) The total duration the asset can be used", "B) The estimated time the asset will be productive", "C) The time it takes for the asset to lose its value", "D) The period over which the asset will generate revenue"], "answer": "B) The estimated time the asset will be productive" },
+    { "type": "mc", "question": "Which depreciation method provides the most accurate reflection of an asset's value reduction due to usage?", "options": ["A) Straight-Line Method", "B) Double Declining Balance Method", "C) Units of Production Method", "D) Sum-of-the-Years-Digits Method"], "answer": "C) Units of Production Method" },
+    { "type": "mc", "question": "What is the impact on the financial statements if an asset is not depreciated over its useful life?", "options": ["A) It will show inflated profits", "B) It will show understated asset values", "C) It will have no impact on the financial statements", "D) It will result in higher taxes"], "answer": "A) It will show inflated profits" },
+    { "type": "mc", "question": "How is the calculation of depreciation affected if an asset's salvage value is underestimated?", "options": ["A) The depreciation expense will be lower", "B) The total depreciation expense will be higher", "C) The annual depreciation expense will be higher", "D) The depreciation expense will be unchanged"], "answer": "B) The total depreciation expense will be higher" },
+    { "type": "mc", "question": "What is the effect of an asset's physical condition on its depreciation expense?", "options": ["A) It directly increases the depreciation expense", "B) It has no effect on the depreciation expense", "C) It indirectly affects the useful life and depreciation expense", "D) It decreases the depreciation expense"], "answer": "C) It indirectly affects the useful life and depreciation expense" },
+    { "type": "mc", "question": "Which of the following factors does not impact the calculation of depreciation expense?", "options": ["A) Salvage value", "B) Book value", "C) Cost of the asset", "D) Market demand for the asset"], "answer": "D) Market demand for the asset" },
+    { "type": "mc", "question": "How does the choice of depreciation method influence a company's financial ratios?", "options": ["A) It has no influence", "B) It affects liquidity ratios", "C) It can impact profitability and asset turnover ratios", "D) It only affects the debt-to-equity ratio"], "answer": "C) It can impact profitability and asset turnover ratios" },
+    { "type": "mc", "question": "What is the result of using a more accelerated depreciation method for tax purposes?", "options": ["A) Higher taxable income", "B) Lower taxable income", "C) No change in taxable income", "D) Increased cash flow"], "answer": "B) Lower taxable income" },
+    { "type": "mc", "question": "What effect does a change in the estimated residual value of an asset have on its remaining depreciation?", "options": ["A) It decreases the remaining depreciation", "B) It increases the remaining depreciation", "C) It has no effect on the remaining depreciation", "D) It changes the asset's book value"], "answer": "A) It decreases the remaining depreciation" },
+    { "type": "mc", "question": "Which method of depreciation allocates the cost of an asset based on its actual usage?", "options": ["A) Straight-Line Method", "B) Units of Production Method", "C) Double Declining Balance Method", "D) Sum-of-the-Years-Digits Method"], "answer": "B) Units of Production Method" },
+    { "type": "mc", "question": "If an asset has an original cost of $80,000, a salvage value of $10,000, and a useful life of 8 years, what is the annual depreciation expense using the Straight-Line Method?", "options": ["A) $8,750", "B) $8,750", "C) $10,000", "D) $8,750"], "answer": "D) $8,750" },
+    { "type": "mc", "question": "In the context of asset impairment, what is meant by 'write-down'?", "options": ["A) Reducing the asset's book value to its fair market value", "B) Increasing the asset's book value to its original cost", "C) Recording the asset's depreciation expense", "D) Recognizing a gain on the asset's sale"], "answer": "A) Reducing the asset's book value to its fair market value" },
+    { "type": "mc", "question": "How does a change in the useful life of an asset affect its depreciation expense under the Sum-of-the-Years-Digits Method?", "options": ["A) It decreases the depreciation expense", "B) It increases the depreciation expense", "C) It has no impact on the depreciation expense", "D) It changes the calculation of the depreciation fraction"], "answer": "A) It decreases the depreciation expense" }
+]
+,
+  "ar": [
+        { "type": "mc", "question": "إذا كان الأصل قد تم استهلاكه بالكامل ولكن لا يزال قيد الاستخدام، كيف يتم الإبلاغ عنه في البيانات المالية؟", "options": ["A) يُبلغ عنه بقيمته المتبقية", "B) يُبلغ عنه بتكلفته الأصلية", "C) يُبلغ عنه بقيمة صفرية", "D) لا يُبلغ عنه في البيانات المالية"], "answer": "C) يُبلغ عنه بقيمة صفرية" },
+        { "type": "mc", "question": "كيف يؤثر اختيار طريقة الاستهلاك على النسب المالية للشركة؟", "options": ["A) لا يؤثر على النسب المالية", "B) يمكن أن يؤثر على نسب الربحية ونسب دوران الأصول", "C) يؤثر بشكل رئيسي على نسب السيولة", "D) يؤثر فقط على الالتزامات الضريبية للشركة"], "answer": "B) يمكن أن يؤثر على نسب الربحية ونسب دوران الأصول" },
+        { "type": "mc", "question": "أي طريقة استهلاك تتطلب إعادة حساب المصروفات كل عام بناءً على القيمة الدفترية المتبقية للأصل؟", "options": ["A) طريقة القسط الثابت", "B) طريقة الرصيد المتناقص المزدوج", "C) طريقة وحدات الإنتاج", "D) طريقة مجموع سنوات الأرقام"], "answer": "B) طريقة الرصيد المتناقص المزدوج" },
+        { "type": "mc", "question": "ماذا يحدث لمصروفات الاستهلاك عندما يتم تمديد عمر الأصل الإنتاجي؟", "options": ["A) ينخفض", "B) يرتفع", "C) يبقى كما هو", "D) يصبح غير ذي أهمية"], "answer": "A) ينخفض" },
+        { "type": "mc", "question": "كيف تتطلب معايير المحاسبة بشكل عام معالجة إطفاء الأصول؟", "options": ["A) كخفض لمصروف الاستهلاك", "B) ك تعديل لقيمة الأصل الدفترية", "C) كخفض لتكلفة الأصل", "D) كزيادة في قيمة الخردة للأصل"], "answer": "B) ك تعديل لقيمة الأصل الدفترية" },
+        { "type": "mc", "question": "في التقارير المالية، كيف يتم تسجيل تكلفة صيانة الأصل عادةً؟", "options": ["A) كمصروف استهلاك", "B) كمصروف تشغيلي", "C) كنفقة رأسمالية", "D) كخصم مباشر من الإيرادات"], "answer": "B) كمصروف تشغيلي" },
+        { "type": "mc", "question": "ما هو الهدف الرئيسي من الاستهلاك للتقارير المالية؟", "options": ["A) لمطابقة المصروفات مع الإيرادات", "B) لحساب القيمة الحالية الصافية للأصل", "C) لتحديد القيمة السوقية للأصل", "D) لتقليل الدخل الخاضع للضريبة"], "answer": "A) لمطابقة المصروفات مع الإيرادات" },
+        { "type": "mc", "question": "أي طريقة استهلاك تعتمد على الافتراض بأن فائدة الأصل الاقتصادية تتناقص مع مرور الوقت؟", "options": ["A) طريقة القسط الثابت", "B) طريقة وحدات الإنتاج", "C) طريقة الرصيد المتناقص المزدوج", "D) طريقة مجموع سنوات الأرقام"], "answer": "C) طريقة الرصيد المتناقص المزدوج" },
+        { "type": "mc", "question": "إذا كانت القيمة الدفترية لأصل 15,000 دولار وقيمته المتبقية 3,000 دولار مع عمر مفيد 5 سنوات، ما هو الاستهلاك السنوي باستخدام طريقة مجموع سنوات الأرقام؟", "options": ["A) 2,400 دولار", "B) 3,000 دولار", "C) 2,800 دولار", "D) 4,000 دولار"], "answer": "C) 2,800 دولار" },
+        { "type": "mc", "question": "كيف تؤثر التغييرات في القيمة المتبقية المقدرة للأصل على طريقة الرصيد المتناقص المزدوج؟", "options": ["A) لا تؤثر على الطريقة", "B) تغير مصروف الاستهلاك السنوي", "C) تغير إجمالي مصروف الاستهلاك", "D) تعدل حساب معامل الاستهلاك"], "answer": "A) لا تؤثر على الطريقة" },
+        { "type": "mc", "question": "ما هو العيب الرئيسي لاستخدام طريقة وحدات الإنتاج؟", "options": ["A) من الصعب تقدير إجمالي الإنتاج", "B) لا تعكس التغييرات في أنماط الاستخدام", "C) تؤدي إلى استهلاك أعلى في السنوات اللاحقة", "D) تتطلب حسابات أكثر تعقيداً"], "answer": "A) من الصعب تقدير إجمالي الإنتاج" },
+        { "type": "mc", "question": "ما هو تأثير استخدام قيمة متبقية أعلى على طريقة القسط الثابت؟", "options": ["A) يزيد من مصروف الاستهلاك السنوي", "B) يقلل من إجمالي مصروف الاستهلاك", "C) ليس له تأثير على إجمالي مصروف الاستهلاك", "D) يزيد من قيمة الأصل الدفترية"], "answer": "B) يقلل من إجمالي مصروف الاستهلاك" },
+        { "type": "mc", "question": "ما هو تأثير تمديد عمر الاستخدام للأصل على طريقة الرصيد المتناقص المزدوج؟", "options": ["A) يقلل من مصروف الاستهلاك السنوي", "B) يزيد من إجمالي مصروف الاستهلاك", "C) ليس له تأثير على مصروف الاستهلاك السنوي", "D) يقلل من قيمة الخردة"], "answer": "A) يقلل من مصروف الاستهلاك السنوي" },
+        { "type": "mc", "question": "إذا تم بيع أصل مقابل 12,000 دولار بينما كانت قيمته الدفترية 10,000 دولار، ما هو الربح أو الخسارة من البيع؟", "options": ["A) ربح 2,000 دولار", "B) خسارة 2,000 دولار", "C) لا ربح ولا خسارة", "D) ربح 1,000 دولار"], "answer": "A) ربح 2,000 دولار" },
+        { "type": "mc", "question": "أي طريقة هي الأفضل للبيانات المالية عندما يتم استخدام الأصل بشكل متساوي طوال فترة عمره؟", "options": ["A) طريقة الرصيد المتناقص المزدوج", "B) طريقة وحدات الإنتاج", "C) طريقة القسط الثابت", "D) طريقة مجموع سنوات الأرقام"], "answer": "C) طريقة القسط الثابت" },
+        { "type": "mc", "question": "عند حساب الاستهلاك، ماذا يشير مصطلح 'العمر المفيد'؟", "options": ["A) إجمالي مدة استخدام الأصل", "B) الوقت المقدّر الذي سيكون فيه الأصل منتجاً", "C) الوقت الذي يستغرقه الأصل لفقدان قيمته", "D) الفترة التي سيولد فيها الأصل إيرادات"], "answer": "B) الوقت المقدّر الذي سيكون فيه الأصل منتجاً" },
+        { "type": "mc", "question": "أي طريقة استهلاك تقدم أدق تعبير عن تقليل قيمة الأصل بسبب الاستخدام؟", "options": ["A) طريقة القسط الثابت", "B) طريقة الرصيد المتناقص المزدوج", "C) طريقة وحدات الإنتاج", "D) طريقة مجموع سنوات الأرقام"], "answer": "C) طريقة وحدات الإنتاج" },
+        { "type": "mc", "question": "ما هو تأثير عدم استهلاك الأصل طوال عمره المفيد على البيانات المالية؟", "options": ["A) سيظهر أرباحاً مبالغاً فيها", "B) سيظهر قيم أصول منخفضة", "C) لن يكون له تأثير على البيانات المالية", "D) سيؤدي إلى زيادة الضرائب"], "answer": "A) سيظهر أرباحاً مبالغاً فيها" },
+        { "type": "mc", "question": "كيف تؤثر تقديرات القيمة المتبقية المنخفضة للأصل على حساب الاستهلاك؟", "options": ["A) ستقلل من مصروف الاستهلاك", "B) ستزيد من إجمالي مصروف الاستهلاك", "C) ستزيد من مصروف الاستهلاك السنوي", "D) سيبقى مصروف الاستهلاك كما هو"], "answer": "B) ستزيد من إجمالي مصروف الاستهلاك" },
+        { "type": "mc", "question": "ما هو تأثير الحالة الفيزيائية للأصل على مصروف الاستهلاك؟", "options": ["A) تزيد من مصروف الاستهلاك مباشرة", "B) ليس لها تأثير على مصروف الاستهلاك", "C) تؤثر بشكل غير مباشر على العمر المفيد ومصروف الاستهلاك", "D) تقلل من مصروف الاستهلاك"], "answer": "C) تؤثر بشكل غير مباشر على العمر المفيد ومصروف الاستهلاك" },
+        { "type": "mc", "question": "أي من العوامل التالية لا تؤثر على حساب مصروف الاستهلاك؟", "options": ["A) قيمة الخردة", "B) العمر المفيد", "C) طريقة الاستهلاك", "D) معدل التضخم"], "answer": "D) معدل التضخم" },
+        { "type": "mc", "question": "في طريقة مجموع سنوات الأرقام، كيف يتم حساب مصروف الاستهلاك السنوي؟", "options": ["A) باستخدام معامل الاستهلاك الثابت", "B) باستخدام نسبة متناقص من العمر المفيد", "C) باستخدام النسبة المئوية لمجموع السنوات", "D) باستخدام قيمة خفض الاستهلاك"], "answer": "C) باستخدام النسبة المئوية لمجموع السنوات" },
+        { "type": "mc", "question": "إذا كان عمر الأصل 10 سنوات وتم تحديده في البداية على 12 سنة، ماذا يحدث لمصروف الاستهلاك بعد تمديد العمر؟", "options": ["A) يظل كما هو", "B) ينخفض مباشرة", "C) يزيد مباشرة", "D) يتغير بناءً على طريقة الاستهلاك"], "answer": "D) يتغير بناءً على طريقة الاستهلاك" },
+        { "type": "mc", "question": "ما هي طريقة الاستهلاك التي تُستخدم لتقليل المصروفات الضريبية في السنوات الأولى من استخدام الأصل؟", "options": ["A) طريقة القسط الثابت", "B) طريقة الرصيد المتناقص المزدوج", "C) طريقة وحدات الإنتاج", "D) طريقة مجموع سنوات الأرقام"], "answer": "B) طريقة الرصيد المتناقص المزدوج" },
+        { "type": "mc", "question": "في طريقة وحدات الإنتاج، كيف يتم تعديل مصروف الاستهلاك إذا زادت الإنتاجية السنوية؟", "options": ["A) يظل كما هو", "B) ينخفض", "C) يزيد", "D) يتغير بناءً على الإنتاجية الفعلية"], "answer": "C) يزيد" },
+        { "type": "mc", "question": "ما هو تأثير تغيير تكلفة الأصل على طريقة القسط الثابت؟", "options": ["A) يؤثر على قيمة مصروف الاستهلاك السنوي", "B) لا يؤثر على مصروف الاستهلاك السنوي", "C) يؤثر على العمر المفيد للأصل", "D) يؤثر على القيمة المتبقية للأصل"], "answer": "A) يؤثر على قيمة مصروف الاستهلاك السنوي" },
+        { "type": "mc", "question": "ما هو التحدي الأساسي في استخدام طريقة الرصيد المتناقص المزدوج عند تقييم أصول ذات قيمة عالية؟", "options": ["A) صعوبة حساب الاستهلاك السنوي", "B) تغيرات غير دقيقة في مصروف الاستهلاك", "C) تقليل مصروف الاستهلاك في السنوات الأخيرة", "D) تأثير كبير على البيانات المالية"], "answer": "C) تقليل مصروف الاستهلاك في السنوات الأخيرة" },
+        { "type": "mc", "question": "كيف يؤثر استخدام طريقة الاستهلاك المتسارع على تقرير التدفقات النقدية؟", "options": ["A) يزيد من المصروفات التشغيلية في السنوات الأولى", "B) يقلل من المصروفات التشغيلية في السنوات الأولى", "C) لا يؤثر على التدفقات النقدية", "D) يزيد من الإيرادات التشغيلية"], "answer": "A) يزيد من المصروفات التشغيلية في السنوات الأولى" },
+        { "type": "mc", "question": "أي من الطرق التالية تسمح بتقدير أقل لمصروف الاستهلاك السنوي عندما تكون القيمة المتبقية عالية؟", "options": ["A) طريقة القسط الثابت", "B) طريقة الرصيد المتناقص المزدوج", "C) طريقة وحدات الإنتاج", "D) طريقة مجموع سنوات الأرقام"], "answer": "A) طريقة القسط الثابت" },
+        { "type": "mc", "question": "في طريقة مجموع سنوات الأرقام، كيف تؤثر قيمة الأصل المتبقية على حساب الاستهلاك؟", "options": ["A) تزيد من مصروف الاستهلاك السنوي", "B) تقلل من مصروف الاستهلاك السنوي", "C) ليس لها تأثير مباشر على المصروفات", "D) تزيد من إجمالي مصروف الاستهلاك"], "answer": "B) تقلل من مصروف الاستهلاك السنوي" },
+        { "type": "mc", "question": "كيف يتم التعامل مع الأصول غير القابلة للاستهلاك في التقارير المالية؟", "options": ["A) كأصول ثابتة", "B) كأصول غير ملموسة", "C) كأصول متداولة", "D) كأصول مستثمرة"], "answer": "A) كأصول ثابتة" },
+        { "type": "mc", "question": "إذا كانت طريقة الاستهلاك تتطلب إعادة تقييم قيمة الأصل بشكل منتظم، أي من الطرق تكون الأنسب؟", "options": ["A) طريقة القسط الثابت", "B) طريقة الرصيد المتناقص المزدوج", "C) طريقة وحدات الإنتاج", "D) طريقة مجموع سنوات الأرقام"], "answer": "C) طريقة وحدات الإنتاج" },
+        { "type": "mc", "question": "ما هو الفرق الأساسي بين طريقة القسط الثابت وطريقة الرصيد المتناقص المزدوج؟", "options": ["A) الطريقة الأولى توزع الاستهلاك بالتساوي، بينما الثانية تركز على السنوات الأولى", "B) الطريقة الأولى تركز على الإنتاجية، بينما الثانية على القيمة المتبقية", "C) الطريقة الأولى تعتمد على العمر، بينما الثانية تعتمد على الاستخدام الفعلي", "D) الطريقة الأولى تعتمد على التكلفة الأصلية، بينما الثانية على قيمة الخردة"], "answer": "A) الطريقة الأولى توزع الاستهلاك بالتساوي، بينما الثانية تركز على السنوات الأولى" },
+        { "type": "mc", "question": "كيف يمكن لمعدل الاستهلاك العالي التأثير على قرارات الاستثمار؟", "options": ["A) يقلل من الجاذبية الاستثمارية للأصل", "B) يزيد من القيمة السوقية للأصل", "C) يؤثر على التدفقات النقدية المستقبلية", "D) ليس له تأثير كبير على قرارات الاستثمار"], "answer": "A) يقلل من الجاذبية الاستثمارية للأصل" },
+        { "type": "mc", "question": "متى يمكن أن يكون استخدام طريقة الرصيد المتناقص المزدوج غير مناسب؟", "options": ["A) عندما يكون للأصل قيمة متبقية عالية", "B) عندما يكون للأصل عمر طويل", "C) عندما يكون للأصل في الاستخدام غير المنتظم", "D) عندما يكون مصروف الاستهلاك السنوي منخفض"], "answer": "A) عندما يكون للأصل قيمة متبقية عالية" },
+        { "type": "mc", "question": "ما هو تأثير استخدام طريقة الاستهلاك التي تعتمد على الاستخدام الفعلي للأصل على البيانات المالية؟", "options": ["A) تعكس الاستهلاك بشكل أكثر دقة", "B) تزيد من تعقيد حساب الاستهلاك", "C) تقلل من الشفافية المالية", "D) لا تؤثر على البيانات المالية"], "answer": "A) تعكس الاستهلاك بشكل أكثر دقة" },
+        { "type": "mc", "question": "أي من العوامل التالية يجب مراعاتها عند اختيار طريقة الاستهلاك؟", "options": ["A) العمر الافتراضي للأصل", "B) طبيعة الاستخدام للأصل", "C) القيمة المتبقية للأصل", "D) جميع ما ذكر"], "answer": "D) جميع ما ذكر" },
+        { "type": "mc", "question": "كيف تؤثر التغييرات في قيمة الخردة على طريقة الاستهلاك؟", "options": ["A) تؤثر على مصروف الاستهلاك السنوي", "B) لا تؤثر على مصروف الاستهلاك", "C) تؤثر على القيمة المتبقية فقط", "D) تؤثر على إجمالي مصروف الاستهلاك"], "answer": "A) تؤثر على مصروف الاستهلاك السنوي" },
+        { "type": "mc", "question": "ما هو تأثير تغيير طريقة الاستهلاك على القيمة الدفترية للأصل؟", "options": ["A) يمكن أن يؤثر على كيفية حساب الاستهلاك فقط", "B) يمكن أن يؤثر على القيمة المتبقية للأصل", "C) يمكن أن يؤثر على مصروف الاستهلاك السنوي", "D) ليس له تأثير على القيمة الدفترية"], "answer": "C) يمكن أن يؤثر على مصروف الاستهلاك السنوي" }
+    ]  
+      };
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+        let selectedLanguage = 'en';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+        });
+
+        function updateRangeValues() {
+            const mcRange = document.getElementById('mcCount');
+            mcRange.max = questions[selectedLanguage].filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function startExam() {
+            selectedLanguage = document.getElementById('languageSelect').value;
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const mcQuestions = questions[selectedLanguage].filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return mcQuestions;
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = true;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((q, index) => {
+                if (userAnswers[index] === q.answer) {
+                    score++;
+                    correctAnswers.push(index + 1);
+                }
+            });
+            document.getElementById('resultContainer').innerHTML = `
+                <div class="result">
+                    <h2>Results</h2>
+                    <p>You scored ${score} out of ${selectedQuestions.length}.</p>
+                    <p>Correct answers: ${correctAnswers.join(', ')}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

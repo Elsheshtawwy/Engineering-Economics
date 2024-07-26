@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam for ch9</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        label {
+            margin-top: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resultContainer {
+            margin-top: 20px;
+        }
+        .result {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .home-container {
+            text-align: center;
+        }
+        .slider-label {
+            display: block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="homeContainer" class="home-container">
+            <h1>ِChapter9 Exam</h1>
+            <label class="slider-label">Select Language:</label>
+            <select id="languageSelect">
+                <option value="en">English</option>
+                <option value="ar">Arabic</option>
+            </select>
+            <br>
+            <label class="slider-label">Select number of Multiple Choice questions:</label>
+            <input type="range" id="mcCount" min="1" max="0" value="5" oninput="updateValue('mcCountValue', this.value)">
+            <span id="mcCountValue">1</span>
+            <br>
+            <button onclick="startExam()">Start the Exam</button>
+        </div>
+        <div id="questionsContainer"></div>
+        <button id="prevBtn" onclick="prevQuestion()" style="display: none;">Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+        <button id="submitBtn" onclick="submitExam()" style="display: none;">Submit</button>
+        <div id="resultContainer"></div>
+    </div>
+    <footer>Developed by Badr El sheshtawy</footer>
+
+    <script>
+           const questions = {
+            "en": [
+    { "type": "mc", "question": "What is the effect of inflation on the purchasing power of money?", "options": ["A) It increases the purchasing power", "B) It decreases the purchasing power", "C) It has no effect on the purchasing power", "D) It doubles the purchasing power"], "answer": "B) It decreases the purchasing power" },
+    { "type": "mc", "question": "In the context of inflation, what is the purpose of converting money from one period to another?", "options": ["A) To determine the future value of investments", "B) To compare the purchasing power across different periods", "C) To calculate interest rates accurately", "D) To adjust for currency fluctuations"], "answer": "B) To compare the purchasing power across different periods" },
+    { "type": "mc", "question": "How would you convert constant-value dollars from period t1 to future dollars in period t2, given an inflation rate of f and n periods?", "options": ["A) Multiply by (1 + f)^n", "B) Divide by (1 + f)^n", "C) Multiply by (1 - f)^n", "D) Divide by (1 - f)^n"], "answer": "A) Multiply by (1 + f)^n" },
+    { "type": "mc", "question": "What would be the equivalent cost of a pizza priced at $8.99 in March 2011 in constant-value 2010 dollars, assuming an inflation rate of 5%?", "options": ["A) $8.56", "B) $8.99", "C) $9.44", "D) $7.60"], "answer": "A) $8.56" },
+    { "type": "mc", "question": "If the inflation rate averages 5% per year, what would be the predicted price of a pizza in March 2020 if it costs $8.99 in March 2011?", "options": ["A) $13.94", "B) $9.44", "C) $12.50", "D) $10.60"], "answer": "A) $13.94" },
+    { "type": "mc", "question": "How do you adjust the interest rate for inflation in a present worth analysis?", "options": ["A) By adding the inflation rate to the real interest rate", "B) By subtracting the inflation rate from the real interest rate", "C) By multiplying the real interest rate by the inflation rate", "D) By dividing the real interest rate by the inflation rate"], "answer": "A) By adding the inflation rate to the real interest rate" },
+    { "type": "mc", "question": "What is the inflation-adjusted interest rate if the real interest rate is 10% and the inflation rate is 4%?", "options": ["A) 14.4%", "B) 10%", "C) 4%", "D) 13.6%"], "answer": "A) 14.4%" },
+    { "type": "mc", "question": "Which of the following statements about inflation is correct?", "options": ["A) Inflation increases the value of money", "B) Inflation decreases the amount of goods or services one can purchase with the same amount of money", "C) Inflation has no impact on the purchasing power of money", "D) Inflation is always beneficial for the economy"], "answer": "B) Inflation decreases the amount of goods or services one can purchase with the same amount of money" },
+    { "type": "mc", "question": "When comparing cash flows from different periods, why is it important to adjust for inflation?", "options": ["A) To understand the historical value of money", "B) To assess the true cost and benefits in today's terms", "C) To avoid currency exchange issues", "D) To calculate interest rates accurately"], "answer": "B) To assess the true cost and benefits in today's terms" },
+    { "type": "mc", "question": "If the inflation rate is 5% per year, what is the approximate future value of $1,000 after 5 years?", "options": ["A) $1,276", "B) $1,250", "C) $1,500", "D) $1,100"], "answer": "A) $1,276" },
+    { "type": "mc", "question": "What is the formula used to calculate the future value of money considering inflation?", "options": ["A) Future Value = Present Value * (1 + f)^n", "B) Future Value = Present Value * (1 - f)^n", "C) Future Value = Present Value / (1 + f)^n", "D) Future Value = Present Value / (1 - f)^n"], "answer": "A) Future Value = Present Value * (1 + f)^n" },
+    { "type": "mc", "question": "What does 'constant-value dollars' refer to in inflation-adjusted calculations?", "options": ["A) Money with an unchanging value across periods", "B) Money adjusted for inflation to represent its value in today's terms", "C) Money that has not been affected by economic changes", "D) Money used for future value predictions"], "answer": "B) Money adjusted for inflation to represent its value in today's terms" },
+    { "type": "mc", "question": "How is the inflation rate integrated into the real interest rate formula?", "options": ["A) By adding it to the nominal interest rate", "B) By subtracting it from the nominal interest rate", "C) By multiplying it with the nominal interest rate", "D) By dividing it into the nominal interest rate"], "answer": "A) By adding it to the nominal interest rate" },
+    { "type": "mc", "question": "What is the equivalent cost of a $8.99 pizza in 2011 dollars if the inflation rate was 5%?", "options": ["A) $8.56", "B) $9.44", "C) $8.99", "D) $7.60"], "answer": "A) $8.56" },
+    { "type": "mc", "question": "If you have $100 today and want to know its future value in 10 years with an annual inflation rate of 3%, which formula will you use?", "options": ["A) Future Value = $100 * (1 + 0.03)^10", "B) Future Value = $100 * (1 - 0.03)^10", "C) Future Value = $100 / (1 + 0.03)^10", "D) Future Value = $100 / (1 - 0.03)^10"], "answer": "A) Future Value = $100 * (1 + 0.03)^10" },
+    { "type": "mc", "question": "What is the real interest rate if the nominal rate is 8% and the inflation rate is 2%?", "options": ["A) 5.88%", "B) 6%", "C) 8%", "D) 10%"], "answer": "A) 5.88%" },
+    { "type": "mc", "question": "How does inflation affect long-term investments?", "options": ["A) It increases their value", "B) It decreases their value", "C) It has no effect on their value", "D) It doubles their value"], "answer": "B) It decreases their value" },
+    { "type": "mc", "question": "If inflation is 4% per year, what will be the equivalent value of $500 today in 15 years?", "options": ["A) $1,800", "B) $2,000", "C) $1,800", "D) $1,800"], "answer": "A) $1,800" },
+    { "type": "mc", "question": "What is the predicted price of an item costing $50 today in 10 years with an inflation rate of 3%?", "options": ["A) $67.26", "B) $71.00", "C) $65.00", "D) $70.00"], "answer": "A) $67.26" },
+    { "type": "mc", "question": "Which of the following is a common method for adjusting cash flows for inflation?", "options": ["A) Using constant-value dollars", "B) Adjusting for interest rates", "C) Comparing nominal and real dollars", "D) Adjusting for currency exchange rates"], "answer": "A) Using constant-value dollars" },
+    { "type": "mc", "question": "What adjustment is needed to account for inflation in a present worth calculation?", "options": ["A) Adjust the interest rate to reflect inflation", "B) Increase the cash flow amounts", "C) Decrease the cash flow amounts", "D) Ignore the inflation rate"], "answer": "A) Adjust the interest rate to reflect inflation" },
+    { "type": "mc", "question": "What is the impact of a high inflation rate on the value of fixed-income investments?", "options": ["A) It increases their value", "B) It decreases their value", "C) It has no impact", "D) It makes them more profitable"], "answer": "B) It decreases their value" },
+    { "type": "mc", "question": "How would you calculate the present value of future cash flows with inflation?", "options": ["A) Discount future cash flows using an inflation-adjusted rate", "B) Multiply future cash flows by the inflation rate", "C) Add inflation to the future cash flows", "D) Ignore inflation in the calculation"], "answer": "A) Discount future cash flows using an inflation-adjusted rate" },
+    { "type": "mc", "question": "What effect does a decreasing inflation rate have on future value calculations?", "options": ["A) It decreases the future value", "B) It increases the future value", "C) It has no effect on the future value", "D) It makes future value calculations more complex"], "answer": "A) It decreases the future value" },
+    { "type": "mc", "question": "What is the formula to adjust nominal interest rates for inflation?", "options": ["A) Real Rate = Nominal Rate - Inflation Rate", "B) Real Rate = Nominal Rate + Inflation Rate", "C) Real Rate = Nominal Rate / Inflation Rate", "D) Real Rate = Nominal Rate * Inflation Rate"], "answer": "A) Real Rate = Nominal Rate - Inflation Rate" },
+    { "type": "mc", "question": "If the inflation rate is 2% and the nominal interest rate is 7%, what is the real interest rate?", "options": ["A) 4.9%", "B) 5%", "C) 7%", "D) 2%"], "answer": "A) 4.9%" }
+],
+  "ar": [
+    { "type": "mc", "question": "ما هو تأثير التضخم على القدرة الشرائية للنقود؟", "options": ["A) يزيد القدرة الشرائية", "B) يقلل القدرة الشرائية", "C) ليس له تأثير على القدرة الشرائية", "D) يضاعف القدرة الشرائية"], "answer": "B) يقلل القدرة الشرائية" },
+    { "type": "mc", "question": "في سياق التضخم، ما هو الغرض من تحويل النقود من فترة إلى أخرى؟", "options": ["A) لتحديد القيمة المستقبلية للاستثمارات", "B) لمقارنة القدرة الشرائية عبر الفترات المختلفة", "C) لحساب أسعار الفائدة بدقة", "D) لتعديل تقلبات العملات"], "answer": "B) لمقارنة القدرة الشرائية عبر الفترات المختلفة" },
+    { "type": "mc", "question": "كيف يمكنك تحويل الدولارات ذات القيمة الثابتة من الفترة t1 إلى الدولارات المستقبلية في الفترة t2، مع معدل تضخم f و n فترة؟", "options": ["A) ضرب بـ (1 + f)^n", "B) قسمة على (1 + f)^n", "C) ضرب بـ (1 - f)^n", "D) قسمة على (1 - f)^n"], "answer": "A) ضرب بـ (1 + f)^n" },
+    { "type": "mc", "question": "ما ستكون التكلفة المكافئة للبيتزا التي سعرها 8.99 دولار في مارس 2011 بالدولارات ذات القيمة الثابتة في عام 2010، إذا كان معدل التضخم 5%؟", "options": ["A) 8.56 دولار", "B) 8.99 دولار", "C) 9.44 دولار", "D) 7.60 دولار"], "answer": "A) 8.56 دولار" },
+    { "type": "mc", "question": "إذا كان معدل التضخم 5% سنويًا، ما هو السعر المتوقع للبيتزا في مارس 2020 إذا كان سعرها 8.99 دولار في مارس 2011؟", "options": ["A) 13.94 دولار", "B) 9.44 دولار", "C) 12.50 دولار", "D) 10.60 دولار"], "answer": "A) 13.94 دولار" },
+    { "type": "mc", "question": "كيف يتم تعديل سعر الفائدة للتضخم في تحليل القيمة الحالية؟", "options": ["A) بإضافة معدل التضخم إلى سعر الفائدة الاسمي", "B) بطرح معدل التضخم من سعر الفائدة الاسمي", "C) بضرب سعر الفائدة الاسمي بمعدل التضخم", "D) بقسمة سعر الفائدة الاسمي على معدل التضخم"], "answer": "A) بإضافة معدل التضخم إلى سعر الفائدة الاسمي" },
+    { "type": "mc", "question": "ما هو سعر الفائدة المعدل بالتضخم إذا كان سعر الفائدة الحقيقي 10% ومعدل التضخم 4%؟", "options": ["A) 14.4%", "B) 10%", "C) 4%", "D) 13.6%"], "answer": "A) 14.4%" },
+    { "type": "mc", "question": "أي من العبارات التالية حول التضخم صحيح؟", "options": ["A) التضخم يزيد من قيمة النقود", "B) التضخم يقلل من كمية السلع أو الخدمات التي يمكن شراؤها بنفس مقدار النقود", "C) التضخم ليس له تأثير على القدرة الشرائية للنقود", "D) التضخم دائمًا مفيد للاقتصاد"], "answer": "B) التضخم يقلل من كمية السلع أو الخدمات التي يمكن شراؤها بنفس مقدار النقود" },
+    { "type": "mc", "question": "عند مقارنة التدفقات النقدية من فترات مختلفة، لماذا من المهم تعديل التضخم؟", "options": ["A) لفهم القيمة التاريخية للنقود", "B) لتقييم التكاليف والفوائد الحقيقية بمصطلحات اليوم", "C) لتجنب مشاكل تبادل العملات", "D) لحساب أسعار الفائدة بدقة"], "answer": "B) لتقييم التكاليف والفوائد الحقيقية بمصطلحات اليوم" },
+    { "type": "mc", "question": "إذا كان معدل التضخم 5% سنويًا، ما هي القيمة المستقبلية التقريبية لـ 100 دولار بعد 5 سنوات؟", "options": ["A) 1276 دولار", "B) 1250 دولار", "C) 1500 دولار", "D) 1100 دولار"], "answer": "A) 1276 دولار" },
+    { "type": "mc", "question": "ما هي الصيغة المستخدمة لحساب القيمة المستقبلية للنقود مع مراعاة التضخم؟", "options": ["A) القيمة المستقبلية = القيمة الحالية * (1 + f)^n", "B) القيمة المستقبلية = القيمة الحالية * (1 - f)^n", "C) القيمة المستقبلية = القيمة الحالية / (1 + f)^n", "D) القيمة المستقبلية = القيمة الحالية / (1 - f)^n"], "answer": "A) القيمة المستقبلية = القيمة الحالية * (1 + f)^n" },
+    { "type": "mc", "question": "ماذا تعني 'الدولارات ذات القيمة الثابتة' في الحسابات المعدلة للتضخم؟", "options": ["A) نقود بقيمة غير متغيرة عبر الفترات", "B) نقود معدلة للتضخم لتمثيل قيمتها بمصطلحات اليوم", "C) نقود لم تتأثر بالتغيرات الاقتصادية", "D) نقود تُستخدم للتنبؤ بالقيمة المستقبلية"], "answer": "B) نقود معدلة للتضخم لتمثيل قيمتها بمصطلحات اليوم" },
+    { "type": "mc", "question": "كيف يتم دمج معدل التضخم في صيغة سعر الفائدة الحقيقي؟", "options": ["A) بإضافته إلى سعر الفائدة الاسمي", "B) بطرحه من سعر الفائدة الاسمي", "C) بضربه في سعر الفائدة الاسمي", "D) بقسيمه على سعر الفائدة الاسمي"], "answer": "A) بإضافته إلى سعر الفائدة الاسمي" },
+    { "type": "mc", "question": "ما هي التكلفة المكافئة لبيتزا سعرها 8.99 دولار في عام 2011 بالدولارات في عام 2010 إذا كان معدل التضخم 5%؟", "options": ["A) 8.56 دولار", "B) 9.44 دولار", "C) 8.99 دولار", "D) 7.60 دولار"], "answer": "A) 8.56 دولار" },
+    { "type": "mc", "question": "إذا كان لديك 100 دولار اليوم وتريد معرفة قيمتها المستقبلية بعد 10 سنوات مع معدل تضخم سنوي 3%، أي الصيغ ستستخدم؟", "options": ["A) القيمة المستقبلية = 100 دولار * (1 + 0.03)^10", "B) القيمة المستقبلية = 100 دولار * (1 - 0.03)^10", "C) القيمة المستقبلية = 100 دولار / (1 + 0.03)^10", "D) القيمة المستقبلية = 100 دولار / (1 - 0.03)^10"], "answer": "A) القيمة المستقبلية = 100 دولار * (1 + 0.03)^10" },
+    { "type": "mc", "question": "ما هو سعر الفائدة الحقيقي إذا كان السعر الاسمي 8% ومعدل التضخم 2%؟", "options": ["A) 6%", "B) 8%", "C) 2%", "D) 10%"], "answer": "A) 6%" },
+    { "type": "mc", "question": "إذا كانت قيمة النقد اليوم 1000 دولار ومعدل التضخم المتوقع 4%، ما هو تقدير القيمة المستقبلية للنقود بعد 5 سنوات؟", "options": ["A) 1216.53 دولار", "B) 1200 دولار", "C) 1100 دولار", "D) 1300 دولار"], "answer": "A) 1216.53 دولار" },
+    { "type": "mc", "question": "ما هو أثر معدل التضخم المرتفع على القرارات الاستثمارية؟", "options": ["A) يقلل من العائد الحقيقي", "B) يزيد من العائد الحقيقي", "C) ليس له تأثير على العائد الحقيقي", "D) يجعل قرارات الاستثمار أكثر تعقيدًا"], "answer": "A) يقلل من العائد الحقيقي" },
+    { "type": "mc", "question": "إذا كان معدل التضخم 6% ومعدل الفائدة الاسمي 12%، ما هو معدل الفائدة الحقيقي؟", "options": ["A) 5.66%", "B) 6%", "C) 7.55%", "D) 12%"], "answer": "C) 7.55%" },
+    { "type": "mc", "question": "ما هي الصيغة المستخدمة لحساب القيمة الحالية للتدفقات النقدية المستقبلية مع التضخم؟", "options": ["A) القيمة الحالية = القيمة المستقبلية / (1 + f)^n", "B) القيمة الحالية = القيمة المستقبلية * (1 + f)^n", "C) القيمة الحالية = القيمة المستقبلية / (1 - f)^n", "D) القيمة الحالية = القيمة المستقبلية * (1 - f)^n"], "answer": "A) القيمة الحالية = القيمة المستقبلية / (1 + f)^n" },
+    { "type": "mc", "question": "ما هو تأثير التضخم على تحليل الجدوى الاقتصادية للمشروعات؟", "options": ["A) يجعل التكاليف أعلى مما يبدو", "B) يقلل من العوائد الصافية", "C) يضلل التقييم الاقتصادي للمشروع", "D) ليس له تأثير على الجدوى الاقتصادية"], "answer": "C) يضلل التقييم الاقتصادي للمشروع" }
+]  
+      };
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedMCCount = 0;
+        let selectedQuestions = [];
+        let selectedLanguage = 'en';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeValues();
+        });
+
+        function updateRangeValues() {
+            const mcRange = document.getElementById('mcCount');
+            mcRange.max = questions[selectedLanguage].filter(q => q.type === 'mc').length;
+        }
+
+        function updateValue(id, value) {
+            document.getElementById(id).innerText = value;
+        }
+
+        function startExam() {
+            selectedLanguage = document.getElementById('languageSelect').value;
+            selectedMCCount = parseInt(document.getElementById('mcCount').value);
+            selectedQuestions = getSelectedQuestions();
+            userAnswers = new Array(selectedQuestions.length).fill(null);
+            document.getElementById('homeContainer').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            displayQuestion();
+        }
+
+        function getSelectedQuestions() {
+            const mcQuestions = questions[selectedLanguage].filter(q => q.type === 'mc').slice(0, selectedMCCount);
+            return mcQuestions;
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const questionObj = selectedQuestions[currentQuestionIndex];
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question', 'active');
+            questionElement.innerHTML = `<p>Question ${currentQuestionIndex + 1}: ${questionObj.question}</p>`;
+
+            if (questionObj.type === 'mc') {
+                questionObj.options.forEach(option => {
+                    questionElement.innerHTML += `
+                        <label style="display:block;"><input type="radio" name="answer" value="${option}"> ${option}</label>
+                    `;
+                });
+            }
+            container.appendChild(questionElement);
+
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedOption = document.querySelector(`input[name="answer"][value="${userAnswers[currentQuestionIndex]}"]`);
+                if (selectedOption) selectedOption.checked = true;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveAnswer();
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                saveAnswer();
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function submitExam() {
+            saveAnswer();
+            let score = 0;
+            let correctAnswers = [];
+            selectedQuestions.forEach((q, index) => {
+                if (userAnswers[index] === q.answer) {
+                    score++;
+                    correctAnswers.push(index + 1);
+                }
+            });
+            document.getElementById('resultContainer').innerHTML = `
+                <div class="result">
+                    <h2>Results</h2>
+                    <p>You scored ${score} out of ${selectedQuestions.length}.</p>
+                    <p>Correct answers: ${correctAnswers.join(', ')}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
